@@ -5,9 +5,9 @@ using UnityEngine;
 public class PuzzleSnap : OVRGrabbable {
 
     public int id = 0;
-    public float maxAngle = Mathf.Cos(10.0f * Mathf.Deg2Rad);
+    public float maxAngle = Mathf.Cos(45.0f * Mathf.Deg2Rad);
     public float puzzleSnapOffset = 0.3f;
-    public float puzzleSnapMargin = 0.005f;
+    public float puzzleSnapMargin = 0.5f;
     public PuzzleSnap north = null;
     public PuzzleSnap south = null;
     public PuzzleSnap east = null;
@@ -16,6 +16,22 @@ public class PuzzleSnap : OVRGrabbable {
 
     override public void GrabBegin(OVRGrabber hand, Collider grabPoint) {
         grabbedAt = Time.time;
+        if (north != null) {
+            north.south = null;
+            north = null;
+        } 
+        if (south != null) {
+            south.north = null;
+            south = null;
+        }
+        if (east != null) {
+            east.west = null;
+            east = null;
+        } 
+        if (west != null) {
+            west.east = null;
+            west = null;
+        }
         base.GrabBegin(hand, grabPoint);
     }
 
@@ -27,17 +43,19 @@ public class PuzzleSnap : OVRGrabbable {
         return isGrabbed && !piece.isGrabbed;
     }
 
-    private void AlignTo(GameObject go, Vector3 snap) {
-        transform.up = go.transform.up;
+    private bool AlignTo(GameObject go, Vector3 snap) {
         Vector3 closestAxis = go.transform.forward;
         Vector3[] axes = { go.transform.right, -go.transform.right, -go.transform.forward };
         foreach (Vector3 axis in axes) {
             if (Vector3.Dot(axis, transform.forward) > Vector3.Dot(closestAxis, transform.forward))
                 closestAxis = axis;
         }
+        if (Vector3.Dot(closestAxis, transform.forward) < maxAngle)
+            return false;
+        transform.up = go.transform.up;
         transform.forward = closestAxis;
-        Vector3 delta = snap - transform.position;
         transform.position = snap;
+        return true;
     }
 
     private void OnTriggerStay(Collider other) {
@@ -50,33 +68,27 @@ public class PuzzleSnap : OVRGrabbable {
         Vector3 eSnap = piece.transform.position + piece.transform.right * puzzleSnapOffset;
         Vector3 wSnap = piece.transform.position - piece.transform.right * puzzleSnapOffset;
 
-        if (piece == north) {
-            AlignTo(piece.gameObject, sSnap);
-        //} else if (piece == south) {
-        //    AlignTo(piece.gameObject, nSnap);
-        } else if (piece == east) {
-            AlignTo(piece.gameObject, wSnap);
-        //} else if (piece == west) {
-        //    AlignTo(piece.gameObject, eSnap);
+        if (this == piece.north && Vector3.Distance(nSnap, transform.position) < puzzleSnapMargin) {
+            AlignTo(piece.gameObject, nSnap);
+        } else if (this == piece.east && Vector3.Distance(eSnap, transform.position) < puzzleSnapMargin) {
+            AlignTo(piece.gameObject, eSnap);
         }
 
         if (ShouldDeselect(piece))
             return;
         if (Vector3.Dot(piece.transform.up, transform.up) < maxAngle)
             return;
-        if (isGrabbed)
-            GrabEnd(Vector3.zero, Vector3.zero);
 
-        if (south == null && Vector3.Distance(nSnap, transform.position) < puzzleSnapMargin) {
+        if (south == null && Vector3.Distance(nSnap, transform.position) < puzzleSnapMargin && AlignTo(piece.gameObject, nSnap)) {
             south = piece;
             piece.north = this;
-        } else if (north == null && Vector3.Distance(sSnap, transform.position) < puzzleSnapMargin) {
+        } else if (north == null && Vector3.Distance(sSnap, transform.position) < puzzleSnapMargin && AlignTo(piece.gameObject, sSnap)) {
             north = piece;
             piece.south = this;
-        } else if (west == null && Vector3.Distance(eSnap, transform.position) < puzzleSnapMargin) {
+        } else if (west == null && Vector3.Distance(eSnap, transform.position) < puzzleSnapMargin && AlignTo(piece.gameObject, eSnap)) {
             west = piece;
             piece.east = this;
-        } else if (east == null && Vector3.Distance(wSnap, transform.position) < puzzleSnapMargin) {
+        } else if (east == null && Vector3.Distance(wSnap, transform.position) < puzzleSnapMargin && AlignTo(piece.gameObject, wSnap)) {
             east = piece;
             piece.west = this;
         }
