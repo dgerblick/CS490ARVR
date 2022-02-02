@@ -722,6 +722,8 @@ MonoBehaviour:
   m_snapOrientation: 0
   m_snapOffset: {fileID: 0}
   m_grabPoints: []
+  prize: {fileID: 0}
+  piece0: {fileID: 1450101702}
   id: 3
   maxAngle: 0.9848077
   puzzleSnapOffset: 0.3
@@ -1292,6 +1294,8 @@ MonoBehaviour:
   m_snapOrientation: 0
   m_snapOffset: {fileID: 0}
   m_grabPoints: []
+  prize: {fileID: 0}
+  piece0: {fileID: 1450101702}
   id: 2
   maxAngle: 0.9848077
   puzzleSnapOffset: 0.3
@@ -1948,6 +1952,8 @@ MonoBehaviour:
   m_snapOrientation: 0
   m_snapOffset: {fileID: 0}
   m_grabPoints: []
+  prize: {fileID: 7084240413650542136, guid: ef5d7f6c1d508cf4c9b8544e096c458f, type: 3}
+  piece0: {fileID: 1450101702}
   id: 0
   maxAngle: 0.9848077
   puzzleSnapOffset: 0.3
@@ -2360,6 +2366,8 @@ MonoBehaviour:
   m_snapOrientation: 0
   m_snapOffset: {fileID: 0}
   m_grabPoints: []
+  prize: {fileID: 0}
+  piece0: {fileID: 1450101702}
   id: 1
   maxAngle: 0.9848077
   puzzleSnapOffset: 0.3

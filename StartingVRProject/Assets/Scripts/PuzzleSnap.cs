@@ -4,6 +4,8 @@ using UnityEngine;
 
 public class PuzzleSnap : OVRGrabbable {
 
+    public GameObject prize;
+    public PuzzleSnap piece0;
     public int id = 0;
     public float maxAngle = Mathf.Cos(45.0f * Mathf.Deg2Rad);
     public float puzzleSnapOffset = 0.3f;
@@ -19,7 +21,7 @@ public class PuzzleSnap : OVRGrabbable {
         if (north != null) {
             north.south = null;
             north = null;
-        } 
+        }
         if (south != null) {
             south.north = null;
             south = null;
@@ -27,12 +29,28 @@ public class PuzzleSnap : OVRGrabbable {
         if (east != null) {
             east.west = null;
             east = null;
-        } 
+        }
         if (west != null) {
             west.east = null;
             west = null;
         }
         base.GrabBegin(hand, grabPoint);
+    }
+
+    private void Complete() {
+        bool complete = id == 0 &&
+                        east != null && east.id == 3 &&
+                        south != null && south.id == 2 &&
+                        east.south != null && east.south.id == 1 &&
+                        south.east != null && south.east.id == 1;
+        if (complete) {
+            Vector3 midpoint = (transform.position +
+                                east.transform.position +
+                                south.transform.position +
+                                south.east.transform.position) / 4;
+            midpoint.y = (midpoint.x + midpoint.z) / 2;
+            Instantiate(prize, midpoint, transform.rotation);
+        }
     }
 
     private bool ShouldDeselect(PuzzleSnap piece) {
@@ -82,15 +100,19 @@ public class PuzzleSnap : OVRGrabbable {
         if (south == null && Vector3.Distance(nSnap, transform.position) < puzzleSnapMargin && AlignTo(piece.gameObject, nSnap)) {
             south = piece;
             piece.north = this;
+            piece0.Complete();
         } else if (north == null && Vector3.Distance(sSnap, transform.position) < puzzleSnapMargin && AlignTo(piece.gameObject, sSnap)) {
             north = piece;
             piece.south = this;
+            piece0.Complete();
         } else if (west == null && Vector3.Distance(eSnap, transform.position) < puzzleSnapMargin && AlignTo(piece.gameObject, eSnap)) {
             west = piece;
             piece.east = this;
+            piece0.Complete();
         } else if (east == null && Vector3.Distance(wSnap, transform.position) < puzzleSnapMargin && AlignTo(piece.gameObject, wSnap)) {
             east = piece;
             piece.west = this;
+            piece0.Complete();
         }
     }
 
