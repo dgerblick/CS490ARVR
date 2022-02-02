@@ -1,0 +1,25 @@
+EXPANDABLE BATON / DOCUMENTATION
+
+> Things to know <
+
+- The Baton is divided in 3 objects to alow it to expand when animating; just like a real one.
+
+- Inside of the [Prefab] folder there's 2 variables ["Expandable Baton_Closed" & "Expandable Baton_Expanded"].
+
+- The textures are labeled like this:
+
+* Expandable Baton_A ["A" as for "Albedo Map"]
+
+* Expandable Baton_N ["N" as for "Normal Map"]
+
+* Expandable Baton_M ["M" as for "Metal Map"]
+
+* Expandable Baton_O ["O" as for "Occlusion Map"]
+
+* Expandable Baton_R ["R" as for "Roughness Map"]
+
+> Contact & Support <
+
+- Guerra_GDL@outlook.com
+
+    
