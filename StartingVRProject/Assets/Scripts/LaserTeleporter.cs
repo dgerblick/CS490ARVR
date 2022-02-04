@@ -8,6 +8,9 @@ public class LaserTeleporter : MonoBehaviour {
     public GameObject cameraRigObject;
     public OVRInput.RawButton teleportButtonLeft = OVRInput.RawButton.X;
     public OVRInput.RawButton teleportButtonRight = OVRInput.RawButton.A;
+    public GameObject previewLeft;
+    public GameObject previewRight;
+    public Camera previewCamera;
     public float laserMaxLength = 100f;
     public float laserTimeToOpen = 4f;
     public Material validTeleport;
@@ -36,6 +39,22 @@ public class LaserTeleporter : MonoBehaviour {
         _maxIncline = Mathf.Cos(Mathf.Deg2Rad * maxInclineDeg);
     }
 
+    private Vector3 GetTeleportDelta(RaycastHit hit) {
+        Vector3 delta = hit.point - _cameraRig.transform.position;
+        if (hit.normal.y < _maxIncline) {
+            // Back up and go to ground if wall is hit
+            RaycastHit downHit;
+            if (Physics.Raycast(hit.point + backupDistance * hit.normal, Vector3.down, out downHit, laserMaxLength))
+                delta = downHit.point - _cameraRig.transform.position;
+        }
+
+        // Correct for transform in play area
+        delta.x -= _cameraRig.centerEyeAnchor.localPosition.x;
+        delta.z -= _cameraRig.centerEyeAnchor.localPosition.z;
+
+        return delta;
+    }
+
     private void Update() {
         if (_lineRenderer.enabled) {
             // Update Laser position
@@ -54,46 +73,45 @@ public class LaserTeleporter : MonoBehaviour {
             RaycastHit hit;
             bool didHit = Physics.Raycast(_activeController.position, _activeController.transform.forward, out hit, laserMaxLength);
             _lineRenderer.material = didHit ? validTeleport : invalidTeleport;
-            if (didHit)
+            Vector3 teleportDelta = Vector3.zero;
+            if (didHit) {
                 _laserPointer.maxLength = Mathf.Min(_laserPointer.maxLength, hit.distance);
+                teleportDelta = GetTeleportDelta(hit);
+                previewCamera.transform.position = _cameraRig.centerEyeAnchor.position + teleportDelta;
+            } else {
+                previewCamera.transform.position = _cameraRig.centerEyeAnchor.position;
+            }
+            previewCamera.transform.rotation = _cameraRig.centerEyeAnchor.rotation;
 
             if (OVRInput.GetDown(teleportButtonLeft) || OVRInput.GetDown(teleportButtonRight)) {
                 // Turn off laser
                 _lineRenderer.enabled = false;
                 _laserOpenTime = 0f;
                 _laserPointer.maxLength = 0f;
+                previewLeft.SetActive(false);
+                previewRight.SetActive(false);
             } else if (OVRInput.GetUp(teleportButtonLeft | teleportButtonRight)) {
                 // Turn off laser
                 _lineRenderer.enabled = false;
                 _laserOpenTime = 0f;
                 _laserPointer.maxLength = 0f;
+                previewLeft.SetActive(false);
+                previewRight.SetActive(false);
 
                 // Teleport
-                if (didHit) {
-                    Vector3 delta = hit.point - _cameraRig.transform.position;
-                    if (hit.normal.y < _maxIncline) {
-                        // Back up and go to ground if wall is hit
-                        RaycastHit downHit;
-                        if (Physics.Raycast(hit.point + backupDistance * hit.normal, Vector3.down, out downHit, laserMaxLength))
-                            delta = downHit.point - _cameraRig.transform.position;
-                    }
-
-                    // Correct for transform in play area
-                    delta.x -= _cameraRig.centerEyeAnchor.localPosition.x;
-                    delta.z -= _cameraRig.centerEyeAnchor.localPosition.z;
-
-                    // Actually teleport
-                    _cameraRig.transform.Translate(delta);
-                }
+                if (didHit)
+                    _cameraRig.transform.Translate(teleportDelta);
             }
         } else if (OVRInput.GetDown(teleportButtonRight)) {
             // Start laser from right controller
             _activeController = _cameraRig.rightControllerAnchor;
             _lineRenderer.enabled = true;
+            previewRight.SetActive(true);
         } else if (OVRInput.GetDown(teleportButtonLeft)) {
             // Start laser from left controller
             _activeController = _cameraRig.leftControllerAnchor;
             _lineRenderer.enabled = true;
+            previewLeft.SetActive(true);
         }
     }
 }
