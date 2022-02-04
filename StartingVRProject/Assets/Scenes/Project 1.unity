@@ -138,7 +138,7 @@ PrefabInstance:
     - target: {fileID: 4136106557536959474, guid: 62b8fe229d77cae488a2dcf86a00c82b,
         type: 3}
       propertyPath: m_LocalPosition.x
-      value: 3.54
+      value: 3.655
       objectReference: {fileID: 0}
     - target: {fileID: 4136106557536959474, guid: 62b8fe229d77cae488a2dcf86a00c82b,
         type: 3}
@@ -148,7 +148,7 @@ PrefabInstance:
     - target: {fileID: 4136106557536959474, guid: 62b8fe229d77cae488a2dcf86a00c82b,
         type: 3}
       propertyPath: m_LocalPosition.z
-      value: 4.501
+      value: 4.547
       objectReference: {fileID: 0}
     - target: {fileID: 4136106557536959474, guid: 62b8fe229d77cae488a2dcf86a00c82b,
         type: 3}
@@ -428,7 +428,7 @@ PrefabInstance:
     - target: {fileID: 3150199114903746168, guid: 67d68b85e3990a14090cf781528f358b,
         type: 3}
       propertyPath: m_LocalPosition.x
-      value: 3.23
+      value: 3.268
       objectReference: {fileID: 0}
     - target: {fileID: 3150199114903746168, guid: 67d68b85e3990a14090cf781528f358b,
         type: 3}
@@ -438,7 +438,7 @@ PrefabInstance:
     - target: {fileID: 3150199114903746168, guid: 67d68b85e3990a14090cf781528f358b,
         type: 3}
       propertyPath: m_LocalPosition.z
-      value: 4.683
+      value: 4.756
       objectReference: {fileID: 0}
     - target: {fileID: 3150199114903746168, guid: 67d68b85e3990a14090cf781528f358b,
         type: 3}
@@ -489,7 +489,7 @@ GameObject:
   - component: {fileID: 312420463}
   - component: {fileID: 312420465}
   - component: {fileID: 312420464}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Preview
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -702,7 +702,7 @@ PrefabInstance:
     - target: {fileID: 3363172803786570868, guid: a182c18bf32c9c34e9ec3b5d786da10d,
         type: 3}
       propertyPath: m_LocalPosition.x
-      value: 3.359
+      value: 3.357
       objectReference: {fileID: 0}
     - target: {fileID: 3363172803786570868, guid: a182c18bf32c9c34e9ec3b5d786da10d,
         type: 3}
@@ -712,7 +712,7 @@ PrefabInstance:
     - target: {fileID: 3363172803786570868, guid: a182c18bf32c9c34e9ec3b5d786da10d,
         type: 3}
       propertyPath: m_LocalPosition.z
-      value: 4.202
+      value: 4.157
       objectReference: {fileID: 0}
     - target: {fileID: 3363172803786570868, guid: a182c18bf32c9c34e9ec3b5d786da10d,
         type: 3}
@@ -803,12 +803,11 @@ MonoBehaviour:
   m_snapOrientation: 0
   m_snapOffset: {fileID: 0}
   m_grabPoints: []
-  prize: {fileID: 0}
-  piece0: {fileID: 1450101702}
+  prize: {fileID: 7084240413650542136, guid: ef5d7f6c1d508cf4c9b8544e096c458f, type: 3}
   id: 3
   maxAngle: 0.9848077
   puzzleSnapOffset: 0.3
-  puzzleSnapMargin: 0.005
+  puzzleSnapMargin: 0.05
   north: {fileID: 0}
   south: {fileID: 0}
   east: {fileID: 0}
@@ -1021,6 +1020,16 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 621074255212364568, guid: 30c8434ad1686434e820d8b01e519dea,
+        type: 3}
+      propertyPath: m_LocalPosition.x
+      value: -0.007
+      objectReference: {fileID: 0}
+    - target: {fileID: 621074255212364568, guid: 30c8434ad1686434e820d8b01e519dea,
+        type: 3}
+      propertyPath: m_LocalPosition.z
+      value: -0.014
+      objectReference: {fileID: 0}
     - target: {fileID: 1451603546401705809, guid: 30c8434ad1686434e820d8b01e519dea,
         type: 3}
       propertyPath: m_Name
@@ -1039,7 +1048,7 @@ PrefabInstance:
     - target: {fileID: 2589243034016107717, guid: 30c8434ad1686434e820d8b01e519dea,
         type: 3}
       propertyPath: m_LocalPosition.x
-      value: 3.073
+      value: 2.989
       objectReference: {fileID: 0}
     - target: {fileID: 2589243034016107717, guid: 30c8434ad1686434e820d8b01e519dea,
         type: 3}
@@ -1049,7 +1058,7 @@ PrefabInstance:
     - target: {fileID: 2589243034016107717, guid: 30c8434ad1686434e820d8b01e519dea,
         type: 3}
       propertyPath: m_LocalPosition.z
-      value: 4.411
+      value: 4.466
       objectReference: {fileID: 0}
     - target: {fileID: 2589243034016107717, guid: 30c8434ad1686434e820d8b01e519dea,
         type: 3}
@@ -1375,12 +1384,11 @@ MonoBehaviour:
   m_snapOrientation: 0
   m_snapOffset: {fileID: 0}
   m_grabPoints: []
-  prize: {fileID: 0}
-  piece0: {fileID: 1450101702}
+  prize: {fileID: 7084240413650542136, guid: ef5d7f6c1d508cf4c9b8544e096c458f, type: 3}
   id: 2
   maxAngle: 0.9848077
   puzzleSnapOffset: 0.3
-  puzzleSnapMargin: 0.005
+  puzzleSnapMargin: 0.05
   north: {fileID: 0}
   south: {fileID: 0}
   east: {fileID: 0}
@@ -1743,7 +1751,7 @@ Light:
   m_RenderMode: 0
   m_CullingMask:
     serializedVersion: 2
-    m_Bits: 4294967295
+    m_Bits: 63
   m_RenderingLayerMask: 1
   m_Lightmapping: 4
   m_LightShadowCasterMode: 0
@@ -1860,7 +1868,7 @@ GameObject:
   - component: {fileID: 1242288744}
   - component: {fileID: 1242288746}
   - component: {fileID: 1242288745}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Preview
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -2202,11 +2210,10 @@ MonoBehaviour:
   m_snapOffset: {fileID: 0}
   m_grabPoints: []
   prize: {fileID: 7084240413650542136, guid: ef5d7f6c1d508cf4c9b8544e096c458f, type: 3}
-  piece0: {fileID: 1450101702}
   id: 0
   maxAngle: 0.9848077
   puzzleSnapOffset: 0.3
-  puzzleSnapMargin: 0.005
+  puzzleSnapMargin: 0.05
   north: {fileID: 0}
   south: {fileID: 0}
   east: {fileID: 0}
@@ -2615,12 +2622,11 @@ MonoBehaviour:
   m_snapOrientation: 0
   m_snapOffset: {fileID: 0}
   m_grabPoints: []
-  prize: {fileID: 0}
-  piece0: {fileID: 1450101702}
+  prize: {fileID: 7084240413650542136, guid: ef5d7f6c1d508cf4c9b8544e096c458f, type: 3}
   id: 1
   maxAngle: 0.9848077
   puzzleSnapOffset: 0.3
-  puzzleSnapMargin: 0.005
+  puzzleSnapMargin: 0.05
   north: {fileID: 0}
   south: {fileID: 0}
   east: {fileID: 0}
