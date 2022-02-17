@@ -15,10 +15,6 @@ public class TableAnchor : MonoBehaviour {
 
     private OVRHand _activeHand = null;
 
-    private void Start() {
-        scaleVec = transform.localPosition.normalized;
-    }
-
     private void Update() {
         float lDist = Vector3.Distance(lHand.transform.position, transform.position);
         float rDist = Vector3.Distance(rHand.transform.position, transform.position);

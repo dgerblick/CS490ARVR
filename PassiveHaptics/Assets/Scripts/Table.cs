@@ -38,7 +38,7 @@ public class Table : MonoBehaviour {
     }
 
     private void Rescale() {
-       SetCubeSize();
+        SetCubeSize();
 
         if (!_button.activeSelf &&
                 (!lHand.IsTracked ||
@@ -85,9 +85,11 @@ public class Table : MonoBehaviour {
         if (_activeHand.GetFingerIsPinching(OVRHand.HandFinger.Index)) {
             _calibHeight = false;
             _calibSize = true;
-            foreach (TableAnchor anchor in _anchors)
+            foreach (TableAnchor anchor in _anchors) {
+                anchor.GetComponent<MeshRenderer>().enabled = true;
                 anchor.enabled = true;
-            _button.SetActive(true);
+            }
+            _button.SetActive(false);
         }
     }
 
@@ -97,7 +99,7 @@ public class Table : MonoBehaviour {
         _activeHand = hand;
         _activeColliders = hand.GetComponentsInChildren<CapsuleCollider>();
         foreach (TableAnchor anchor in _anchors) {
-            anchor.gameObject.SetActive(true);
+            anchor.GetComponent<MeshRenderer>().enabled = false;
             anchor.enabled = false;
         }
         _button.SetActive(false);
@@ -106,8 +108,10 @@ public class Table : MonoBehaviour {
     public void EndCalib(OVRHand hand) {
         _calibHeight = false;
         _calibSize = false;
-        foreach (TableAnchor anchor in _anchors)
-            anchor.gameObject.SetActive(false);
+        foreach (TableAnchor anchor in _anchors) {
+            anchor.GetComponent<MeshRenderer>().enabled = false;
+            anchor.enabled = false;
+        }
         _button.SetActive(false);
     }
 }

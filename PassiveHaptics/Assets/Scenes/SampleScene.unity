@@ -448,8 +448,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   anchorType: 0
-  scaleVec: {x: 0, y: 0, z: 0}
-  pinchDist: 0.1
+  scaleVec: {x: -1, y: 0, z: 0}
+  pinchDist: 0.2
   lHand: {fileID: 1507687320}
   rHand: {fileID: 143286059}
 --- !u!23 &119513443
@@ -1090,8 +1090,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   anchorType: 0
-  scaleVec: {x: 0, y: 0, z: 0}
-  pinchDist: 0.1
+  scaleVec: {x: 1, y: 0, z: 0}
+  pinchDist: 0.2
   lHand: {fileID: 1507687320}
   rHand: {fileID: 143286059}
 --- !u!23 &373880796
@@ -1723,8 +1723,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   anchorType: 0
-  scaleVec: {x: 0, y: 0, z: 0}
-  pinchDist: 0.1
+  scaleVec: {x: 0, y: 0, z: 1}
+  pinchDist: 0.2
   lHand: {fileID: 1507687320}
   rHand: {fileID: 143286059}
 --- !u!23 &605435953
@@ -2325,7 +2325,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 28b2a1e136aa09d4cb0f60cef4e1718c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  offset: -0.01
+  offset: -0.005
   thickness: 0.0125
   buttonAppearDist: 0.5
   lHand: {fileID: 1507687320}
@@ -4779,8 +4779,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   anchorType: 0
-  scaleVec: {x: 0, y: 0, z: 0}
-  pinchDist: 0.1
+  scaleVec: {x: 0, y: 0, z: -1}
+  pinchDist: 0.2
   lHand: {fileID: 1507687320}
   rHand: {fileID: 143286059}
 --- !u!23 &1989257817
