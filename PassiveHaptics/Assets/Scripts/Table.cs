@@ -6,48 +6,69 @@ public class Table : MonoBehaviour {
 
     public float offset = -0.05f;
     public float thickness = 0.025f;
+    public float buttonAppearDist = 0.2f;
+    public OVRHand lHand;
+    public OVRHand rHand;
 
     private bool _calibHeight = false;
+    private bool _calibSize = false;
     private OVRHand _activeHand;
     private CapsuleCollider[] _activeColliders;
     private TableAnchor[] _anchors;
     private GameObject _cube;
+    private GameObject _button;
 
     private void Start() {
         _anchors = GetComponentsInChildren<TableAnchor>();
+        _button = GetComponentInChildren<CustomButton>().transform.parent.gameObject;
+
         _cube = GameObject.CreatePrimitive(PrimitiveType.Cube);
         _cube.transform.SetParent(transform);
         _cube.transform.localPosition = Vector3.zero;
         _cube.transform.localRotation = Quaternion.identity;
         _cube.transform.localScale = new Vector3(0, thickness, 0);
+        SetCubeSize();
     }
 
     private void LateUpdate() {
-        if (_calibHeight && _activeHand.enabled)
+        if (_calibHeight && _activeHand.IsTracked)
             CalibHeight();
-        else
+        else if (_calibSize)
             Rescale();
     }
 
     private void Rescale() {
+       SetCubeSize();
+
+        if (!_button.activeSelf &&
+                (!lHand.IsTracked ||
+                    Vector3.Distance(lHand.transform.position, transform.position) > buttonAppearDist) &&
+                (!rHand.IsTracked ||
+                    Vector3.Distance(rHand.transform.position, transform.position) > buttonAppearDist)) {
+            _button.SetActive(true);
+            _calibSize = false;
+        }
+    }
+
+    private void SetCubeSize() {
         float minX = float.PositiveInfinity;
         float minZ = float.PositiveInfinity;
         float maxX = float.NegativeInfinity;
         float maxZ = float.NegativeInfinity;
-        foreach (TableAnchor anchor in _anchors) {
-            minX = Mathf.Min(anchor.transform.localPosition.x, minX);
-            minZ = Mathf.Min(anchor.transform.localPosition.z, minZ);
-            maxX = Mathf.Max(anchor.transform.localPosition.x, maxX);
-            maxZ = Mathf.Max(anchor.transform.localPosition.z, maxZ);
+        Vector3[] positions = new Vector3[_anchors.Length];
+        for (int i = 0; i < _anchors.Length; i++) {
+            positions[i] = _anchors[i].transform.position;
+            minX = Mathf.Min(_anchors[i].transform.localPosition.x, minX);
+            minZ = Mathf.Min(_anchors[i].transform.localPosition.z, minZ);
+            maxX = Mathf.Max(_anchors[i].transform.localPosition.x, maxX);
+            maxZ = Mathf.Max(_anchors[i].transform.localPosition.z, maxZ);
         }
-        Vector3 delta = new Vector3((maxX + minX) / 2, 0, (maxZ + minZ) / 2);
-        transform.Translate(delta);
+        transform.Translate((maxX + minX) / 2, 0, (maxZ + minZ) / 2);
         _cube.transform.localScale = new Vector3(maxX - minX, thickness, maxZ - minZ);
-        foreach (TableAnchor anchor in _anchors) {
-            anchor.transform.localPosition = Vector3.Project(anchor.transform.localPosition, anchor.scaleVec);
-            anchor.transform.Translate(-delta);
+        for (int i = 0; i < _anchors.Length; i++) {
+            _anchors[i].transform.position = positions[i];
+            _anchors[i].transform.localPosition = Vector3.Project(_anchors[i].transform.localPosition, _anchors[i].scaleVec);
         }
-
     }
 
     private void CalibHeight() {
@@ -63,16 +84,30 @@ public class Table : MonoBehaviour {
 
         if (_activeHand.GetFingerIsPinching(OVRHand.HandFinger.Index)) {
             _calibHeight = false;
+            _calibSize = true;
             foreach (TableAnchor anchor in _anchors)
                 anchor.enabled = true;
+            _button.SetActive(true);
         }
     }
 
     public void StartCalibHeight(OVRHand hand) {
         _calibHeight = true;
+        _calibSize = false;
         _activeHand = hand;
         _activeColliders = hand.GetComponentsInChildren<CapsuleCollider>();
-        foreach (TableAnchor anchor in _anchors)
+        foreach (TableAnchor anchor in _anchors) {
+            anchor.gameObject.SetActive(true);
             anchor.enabled = false;
+        }
+        _button.SetActive(false);
+    }
+
+    public void EndCalib(OVRHand hand) {
+        _calibHeight = false;
+        _calibSize = false;
+        foreach (TableAnchor anchor in _anchors)
+            anchor.gameObject.SetActive(false);
+        _button.SetActive(false);
     }
 }

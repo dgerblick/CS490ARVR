@@ -19,12 +19,12 @@ public class CustomButton : MonoBehaviour {
 
     private void Start() {
         _isPressed = false;
-        _startPos = transform.position.y;
+        _startPos = transform.localPosition.y;
         _joint = GetComponent<ConfigurableJoint>();
     }
 
     private void Update() {
-        float amount = Mathf.Abs(_startPos - transform.position.y) / _joint.linearLimit.limit;
+        float amount = Mathf.Abs(_startPos - transform.localPosition.y) / _joint.linearLimit.limit;
         
         if (!_isPressed && amount >= pressThreshold)
             ButtonPress();
