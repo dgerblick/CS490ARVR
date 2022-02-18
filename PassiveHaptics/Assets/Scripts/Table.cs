@@ -4,23 +4,38 @@ using UnityEngine;
 
 public class Table : MonoBehaviour {
 
+    public enum State {
+        None,
+        CalibHeight,
+        CalibSize,
+        BugGameSpawn,
+        BugGamePlay,
+    };
+
+    public State state = State.None;
     public float offset = -0.05f;
     public float thickness = 0.025f;
     public float buttonAppearDist = 0.2f;
     public OVRHand lHand;
     public OVRHand rHand;
+    public Bug bugPrefab;
+    public float bugSpawnTime = 10.0f;
+    public float bugSpawnRate = 10.0f;
+    public List<Bug> bugs;
 
-    private bool _calibHeight = false;
-    private bool _calibSize = false;
     private OVRHand _activeHand;
     private CapsuleCollider[] _activeColliders;
     private TableAnchor[] _anchors;
     private GameObject _cube;
     private GameObject _button;
+    private float _bugSpawnDelay;
+    private float _bugSpawnCountdown;
 
     private void Start() {
         _anchors = GetComponentsInChildren<TableAnchor>();
         _button = GetComponentInChildren<CustomButton>().transform.parent.gameObject;
+        _bugSpawnDelay = 0.0f;
+        _bugSpawnCountdown = bugSpawnTime;
 
         _cube = GameObject.CreatePrimitive(PrimitiveType.Cube);
         _cube.transform.SetParent(transform);
@@ -31,10 +46,42 @@ public class Table : MonoBehaviour {
     }
 
     private void LateUpdate() {
-        if (_calibHeight && _activeHand.IsTracked)
-            CalibHeight();
-        else if (_calibSize)
-            Rescale();
+        switch (state) {
+            case State.CalibHeight:
+                if (_activeHand.IsTracked)
+                    CalibHeight();
+                break;
+            case State.CalibSize:
+                Rescale();
+                break;
+            case State.BugGameSpawn:
+                BugGameSpawn();
+                break;
+            default:
+                break;
+        }
+    }
+
+    private void BugGameSpawn() {
+        if (_bugSpawnCountdown <= 0) {
+            state = State.BugGamePlay;
+            _bugSpawnCountdown = bugSpawnTime;
+            return;
+        }
+        _bugSpawnCountdown -= Time.deltaTime;
+        _bugSpawnDelay -= Time.deltaTime;
+        while (_bugSpawnDelay <= 0) {
+            Bug bug = Instantiate<Bug>(bugPrefab, transform);
+            bug.transform.Rotate(0, Random.Range(0f, 360f), 0);
+            bug.transform.localPosition = new Vector3(
+                Random.Range(-0.5f, 0.5f) * _cube.transform.localScale.x,
+                thickness / 2,
+                Random.Range(-0.5f, 0.5f) * _cube.transform.localScale.z
+            );                        
+            bug.table = this;
+            bugs.Add(bug);
+            _bugSpawnDelay += 1 / bugSpawnRate;
+        }
     }
 
     private void Rescale() {
@@ -46,7 +93,6 @@ public class Table : MonoBehaviour {
                 (!rHand.IsTracked ||
                     Vector3.Distance(rHand.transform.position, transform.position) > buttonAppearDist)) {
             _button.SetActive(true);
-            _calibSize = false;
         }
     }
 
@@ -83,8 +129,7 @@ public class Table : MonoBehaviour {
         transform.SetPositionAndRotation(pos, rot);
 
         if (_activeHand.GetFingerIsPinching(OVRHand.HandFinger.Index)) {
-            _calibHeight = false;
-            _calibSize = true;
+            state = State.CalibSize;
             foreach (TableAnchor anchor in _anchors) {
                 anchor.GetComponent<MeshRenderer>().enabled = true;
                 anchor.enabled = true;
@@ -94,8 +139,7 @@ public class Table : MonoBehaviour {
     }
 
     public void StartCalibHeight(OVRHand hand) {
-        _calibHeight = true;
-        _calibSize = false;
+        state = State.CalibHeight;
         _activeHand = hand;
         _activeColliders = hand.GetComponentsInChildren<CapsuleCollider>();
         foreach (TableAnchor anchor in _anchors) {
@@ -106,8 +150,7 @@ public class Table : MonoBehaviour {
     }
 
     public void EndCalib(OVRHand hand) {
-        _calibHeight = false;
-        _calibSize = false;
+        state = State.BugGameSpawn;
         foreach (TableAnchor anchor in _anchors) {
             anchor.GetComponent<MeshRenderer>().enabled = false;
             anchor.enabled = false;
