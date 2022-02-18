@@ -37,7 +37,7 @@ public class Bug : MonoBehaviour {
     }
 
     private void OnTriggerEnter(Collider other) {
-        table.bugs.Remove(this);
+        table.RemoveBug(this);
         _audioSource.PlayOneShot(_audioSource.clip);
         transform.localScale = new Vector3(transform.localScale.x, transform.localScale.y / 4, transform.localScale.z);
         enabled = false;

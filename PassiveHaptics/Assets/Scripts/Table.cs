@@ -18,10 +18,10 @@ public class Table : MonoBehaviour {
     public float buttonAppearDist = 0.2f;
     public OVRHand lHand;
     public OVRHand rHand;
+    public TMPro.TextMeshPro textMesh;
     public Bug bugPrefab;
     public float bugSpawnTime = 10.0f;
     public float bugSpawnRate = 10.0f;
-    public List<Bug> bugs;
 
     private OVRHand _activeHand;
     private CapsuleCollider[] _activeColliders;
@@ -30,6 +30,8 @@ public class Table : MonoBehaviour {
     private GameObject _button;
     private float _bugSpawnDelay;
     private float _bugSpawnCountdown;
+    public List<Bug> _bugs;
+    public int _bugScore = 0;
     private float _minX;
     private float _minZ;
     private float _maxX;
@@ -47,6 +49,8 @@ public class Table : MonoBehaviour {
         _cube.transform.localRotation = Quaternion.identity;
         _cube.transform.localScale = new Vector3(0, thickness, 0);
         SetCubeSize();
+
+        textMesh.SetText("To begin, press one of the red buttons at your feet (Watch your head!)");
     }
 
     private void LateUpdate() {
@@ -63,6 +67,14 @@ public class Table : MonoBehaviour {
                 break;
             default:
                 break;
+        }
+    }
+
+    public void RemoveBug(Bug bug) {
+        if (_bugs.Contains(bug)) {
+            _bugs.Remove(bug);
+            _bugScore++;
+            textMesh.SetText("Smash all of the bugs!\nScore: " + _bugScore);
         }
     }
 
@@ -85,7 +97,7 @@ public class Table : MonoBehaviour {
             bug.table = this;
             bug.xBounds = (_maxX - _minX) / 2;
             bug.zBounds = (_maxZ - _minZ) / 2;
-            bugs.Add(bug);
+            _bugs.Add(bug);
             _bugSpawnDelay += 1 / bugSpawnRate;
         }
     }
@@ -141,10 +153,13 @@ public class Table : MonoBehaviour {
                 anchor.enabled = true;
             }
             _button.SetActive(false);
+            textMesh.SetText("With your wrist near one of the balls on the edge, pinch and move to adjust the size of the table\nPress the red button in the middle of the table when you're done");
         }
     }
 
     public void StartCalibHeight(OVRHand hand) {
+        if (state != State.None)
+            return;
         state = State.CalibHeight;
         _activeHand = hand;
         _activeColliders = hand.GetComponentsInChildren<CapsuleCollider>();
@@ -153,6 +168,7 @@ public class Table : MonoBehaviour {
             anchor.enabled = false;
         }
         _button.SetActive(false);
+        textMesh.SetText("To set the virtual table height, place your hand on the real table and pinch your thumb and index finger.");
     }
 
     public void EndCalib(OVRHand hand) {
@@ -162,5 +178,6 @@ public class Table : MonoBehaviour {
             anchor.enabled = false;
         }
         _button.SetActive(false);
+        textMesh.SetText("Smash all of the bugs!\nScore: " + _bugScore);
     }
 }
