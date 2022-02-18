@@ -30,6 +30,10 @@ public class Table : MonoBehaviour {
     private GameObject _button;
     private float _bugSpawnDelay;
     private float _bugSpawnCountdown;
+    private float _minX;
+    private float _minZ;
+    private float _maxX;
+    private float _maxZ;
 
     private void Start() {
         _anchors = GetComponentsInChildren<TableAnchor>();
@@ -79,6 +83,8 @@ public class Table : MonoBehaviour {
                 Random.Range(-0.5f, 0.5f) * _cube.transform.localScale.z
             );                        
             bug.table = this;
+            bug.xBounds = (_maxX - _minX) / 2;
+            bug.zBounds = (_maxZ - _minZ) / 2;
             bugs.Add(bug);
             _bugSpawnDelay += 1 / bugSpawnRate;
         }
@@ -97,20 +103,20 @@ public class Table : MonoBehaviour {
     }
 
     private void SetCubeSize() {
-        float minX = float.PositiveInfinity;
-        float minZ = float.PositiveInfinity;
-        float maxX = float.NegativeInfinity;
-        float maxZ = float.NegativeInfinity;
+        _minX = float.PositiveInfinity;
+        _minZ = float.PositiveInfinity;
+        _maxX = float.NegativeInfinity;
+        _maxZ = float.NegativeInfinity;
         Vector3[] positions = new Vector3[_anchors.Length];
         for (int i = 0; i < _anchors.Length; i++) {
             positions[i] = _anchors[i].transform.position;
-            minX = Mathf.Min(_anchors[i].transform.localPosition.x, minX);
-            minZ = Mathf.Min(_anchors[i].transform.localPosition.z, minZ);
-            maxX = Mathf.Max(_anchors[i].transform.localPosition.x, maxX);
-            maxZ = Mathf.Max(_anchors[i].transform.localPosition.z, maxZ);
+            _minX = Mathf.Min(_anchors[i].transform.localPosition.x, _minX);
+            _minZ = Mathf.Min(_anchors[i].transform.localPosition.z, _minZ);
+            _maxX = Mathf.Max(_anchors[i].transform.localPosition.x, _maxX);
+            _maxZ = Mathf.Max(_anchors[i].transform.localPosition.z, _maxZ);
         }
-        transform.Translate((maxX + minX) / 2, 0, (maxZ + minZ) / 2);
-        _cube.transform.localScale = new Vector3(maxX - minX, thickness, maxZ - minZ);
+        transform.Translate((_maxX + _minX) / 2, 0, (_maxZ + _minZ) / 2);
+        _cube.transform.localScale = new Vector3(_maxX - _minX, thickness, _maxZ - _minZ);
         for (int i = 0; i < _anchors.Length; i++) {
             _anchors[i].transform.position = positions[i];
             _anchors[i].transform.localPosition = Vector3.Project(_anchors[i].transform.localPosition, _anchors[i].scaleVec);

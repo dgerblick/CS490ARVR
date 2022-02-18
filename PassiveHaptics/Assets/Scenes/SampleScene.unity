@@ -2328,7 +2328,7 @@ MonoBehaviour:
   state: 0
   offset: -0.005
   thickness: 0.0125
-  buttonAppearDist: 0.5
+  buttonAppearDist: 0.2
   lHand: {fileID: 1507687320}
   rHand: {fileID: 143286059}
   bugPrefab: {fileID: 4453407133382824003, guid: 9470b2727e8b2e54cbda92e05ffa786e, type: 3}
