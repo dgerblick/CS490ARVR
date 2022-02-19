@@ -2457,6 +2457,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1001697527}
   - component: {fileID: 1001697528}
+  - component: {fileID: 1001697529}
   m_Layer: 0
   m_Name: Table
   m_TagString: Untagged
@@ -2503,10 +2504,24 @@ MonoBehaviour:
   rHand: {fileID: 143286059}
   textMesh: {fileID: 704858205}
   bugPrefab: {fileID: 4453407133382824003, guid: 9470b2727e8b2e54cbda92e05ffa786e, type: 3}
-  bugSpawnTime: 10
-  bugSpawnRate: 10
+  bugSpawnTime: 1
+  bugSpawnRate: 1
+  touchCubeOffset: 0.1
   _bugs: []
   _bugScore: 0
+--- !u!65 &1001697529
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1001697526}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 1
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Size: {x: 1, y: 0.5, z: 1}
+  m_Center: {x: 0, y: 0.25, z: 0}
 --- !u!1 &1074330561
 GameObject:
   m_ObjectHideFlags: 0
