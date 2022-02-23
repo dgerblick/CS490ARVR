@@ -27,8 +27,8 @@ public class Table : MonoBehaviour {
     public List<Bug> bugs;
 
     private OVRHand _activeHand;
-    public bool _leftIn = false;
-    public bool _rightIn = false;
+    private bool _leftIn = false;
+    private bool _rightIn = false;
     private CapsuleCollider[] _activeColliders;
     private TableAnchor[] _anchors;
     private GameObject _tableCube;
@@ -143,6 +143,23 @@ public class Table : MonoBehaviour {
         return false;
     }
 
+    private void RedirectHand(Transform hand, Vector3 center, Vector3 target) {
+        Vector3 toHand = hand.parent.position - center;
+        if (toHand.magnitude >= _detectRadius) {
+            hand.position = hand.parent.position;
+            return;
+        } else if (toHand.magnitude == 0) {
+            hand.position = target;
+            return;
+        }
+
+        Vector3 entryPoint = center + _detectRadius * toHand.normalized;
+        float ratio = toHand.magnitude / _detectRadius;
+        hand.position = ratio * hand.parent.position + (1 - ratio) * target;
+
+        Debug.Log("center:" + center + ", target:" + target + ", ratio:" + ratio + ", pos:" + hand.position);
+    }
+
     private void Redirect() {
         bool isMoving = false;
         if (_rightIn)
@@ -159,6 +176,13 @@ public class Table : MonoBehaviour {
                 _selectedCube = Random.Range(0, 3);
                 _touchCubes[_selectedCube].GetComponent<MeshRenderer>().material = selected;
             }
+            lHand.transform.localPosition = Vector3.zero;
+            rHand.transform.localPosition = Vector3.zero;
+        } else {
+            Vector3 center = _touchCubesParent.transform.TransformPoint(_touchCubes[1].transform.localPosition + Vector3.up);
+            Vector3 target = _touchCubesParent.transform.TransformPoint(_touchCubes[_selectedCube].transform.localPosition + Vector3.up);
+            RedirectHand(lHand.transform, center, target);
+            RedirectHand(rHand.transform, center, target);
         }
     }
 
