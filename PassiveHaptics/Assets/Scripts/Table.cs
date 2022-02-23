@@ -44,7 +44,6 @@ public class Table : MonoBehaviour {
     private float _maxX;
     private float _maxZ;
     private float _detectRadius;
-    private float _timeExit = 0.0f;
     private int _selectedCube = -1;
 
     private void Start() {
@@ -81,10 +80,13 @@ public class Table : MonoBehaviour {
 
     private void LateUpdate() {
         _leftIn = lHand.IsTracked
+                  && Mathf.Pow(lHand.transform.position.x - transform.position.x, 2)
+                     + Mathf.Pow(lHand.transform.position.z - transform.position.z, 2) <= Mathf.Pow(_detectRadius, 2)
                   && Vector3.Distance(lHand.transform.position, transform.position) <= _detectRadius
                   && lHand.transform.position.y > transform.position.y;
         _rightIn = rHand.IsTracked
-                   && Vector3.Distance(rHand.transform.position, transform.position) <= _detectRadius
+                   && Mathf.Pow(rHand.transform.position.x - transform.position.x, 2)
+                     + Mathf.Pow(rHand.transform.position.z - transform.position.z, 2) <= Mathf.Pow(_detectRadius, 2)
                    && rHand.transform.position.y > transform.position.y;
         switch (state) {
             case State.CalibHeight:
@@ -118,9 +120,9 @@ public class Table : MonoBehaviour {
         }
     }
 
-    private void SetTouchCubeSize(OVRHand hand) {
+    private bool SetTouchCubeSize(OVRHand hand) {
         if (!hand.GetFingerIsPinching(OVRHand.HandFinger.Index))
-            return;
+            return false;
         float minY = float.PositiveInfinity;
         CapsuleCollider[] colliders = hand.GetComponentsInChildren<CapsuleCollider>();
         foreach (CapsuleCollider collider in colliders)
@@ -135,23 +137,28 @@ public class Table : MonoBehaviour {
                 _touchCubesParent.SetActive(true);
             _touchCubesParent.transform.position = newPos;
             _touchCubesParent.transform.localScale = Mathf.Abs(transform.position.y - minY) * Vector3.one;
+            _selectedCube = -1;
+            return true;
         }
+        return false;
     }
 
     private void Redirect() {
-        if (_leftIn)
-            SetTouchCubeSize(lHand);
+        bool isMoving = false;
         if (_rightIn)
-            SetTouchCubeSize(rHand);
+            isMoving = SetTouchCubeSize(rHand);
+        else if (_leftIn)
+            isMoving = SetTouchCubeSize(lHand);
 
-        if (_timeExit >= 0)
-            _timeExit += Time.deltaTime;
-        if (_timeExit >= 1) {
-            _timeExit = -1;
+        if (!_rightIn && !_leftIn)
+            _selectedCube = -1;
+        if (_selectedCube == -1) {
             foreach (GameObject cube in _touchCubes)
                 cube.GetComponent<MeshRenderer>().material = deselected;
-            _selectedCube = Random.Range(0, 3);
-            _touchCubes[_selectedCube].GetComponent<MeshRenderer>().material = selected;
+            if (!isMoving && (_rightIn || _leftIn)) {
+                _selectedCube = Random.Range(0, 3);
+                _touchCubes[_selectedCube].GetComponent<MeshRenderer>().material = selected;
+            }
         }
     }
 
