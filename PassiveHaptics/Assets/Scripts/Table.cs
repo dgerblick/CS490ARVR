@@ -120,7 +120,7 @@ public class Table : MonoBehaviour {
                 rButton.transform.position = transform.TransformPoint(_maxX - rButton.transform.localScale.x, 0, _maxZ - rButton.transform.localScale.z);
                 lButton.SetActive(true);
                 rButton.SetActive(true);
-                textMesh.SetText("Pinch to set the size and position of the real object");
+                textMesh.SetText("Pinch to set the size and position of the real object.\nPress one of the buttons, then reach out to touch the highlighted objects.");
             }
         }
     }
@@ -158,7 +158,7 @@ public class Table : MonoBehaviour {
         bool isMoving = false;
         if (_rightIn)
             isMoving = SetTouchCubeSize(rHand);
-        else if (_leftIn)
+        if (!isMoving && _leftIn)
             isMoving = SetTouchCubeSize(lHand);
 
         if (_selectedCube == -1) {
