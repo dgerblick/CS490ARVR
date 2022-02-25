@@ -17,6 +17,8 @@ public class Table : MonoBehaviour {
     public float thickness = 0.025f;
     public OVRHand lHand;
     public OVRHand rHand;
+    public GameObject lButton;
+    public GameObject rButton;
     public TMPro.TextMeshPro textMesh;
     public Bug bugPrefab;
     public float bugSpawnTime = 10.0f;
@@ -29,13 +31,13 @@ public class Table : MonoBehaviour {
     private OVRHand _activeHand;
     private bool _leftIn = false;
     private bool _rightIn = false;
+    public Vector3 _redirectStart;
     private CapsuleCollider[] _activeColliders;
     private TableAnchor[] _anchors;
     private GameObject _tableCube;
     private GameObject _button;
     private GameObject _touchCubesParent;
     private GameObject[] _touchCubes;
-    private BoxCollider _collider;
     private float _bugSpawnDelay;
     private float _bugSpawnCountdown;
     private int _bugScore = 0;
@@ -49,7 +51,6 @@ public class Table : MonoBehaviour {
     private void Start() {
         _anchors = GetComponentsInChildren<TableAnchor>();
         _button = GetComponentInChildren<CustomButton>().transform.parent.gameObject;
-        _collider = GetComponent<BoxCollider>();
         _bugSpawnDelay = 0.0f;
         _bugSpawnCountdown = bugSpawnTime;
 
@@ -80,14 +81,14 @@ public class Table : MonoBehaviour {
 
     private void LateUpdate() {
         _leftIn = lHand.IsTracked
-                  && Mathf.Pow(lHand.transform.position.x - transform.position.x, 2)
-                     + Mathf.Pow(lHand.transform.position.z - transform.position.z, 2) <= Mathf.Pow(_detectRadius, 2)
-                  && Vector3.Distance(lHand.transform.position, transform.position) <= _detectRadius
-                  && lHand.transform.position.y > transform.position.y;
+                  && Mathf.Pow(lHand.transform.parent.position.x - transform.position.x, 2)
+                     + Mathf.Pow(lHand.transform.parent.position.z - transform.position.z, 2) <= Mathf.Pow(_detectRadius, 2)
+                  && Vector3.Distance(lHand.transform.parent.position, transform.position) <= _detectRadius
+                  && lHand.transform.parent.position.y > transform.position.y;
         _rightIn = rHand.IsTracked
-                   && Mathf.Pow(rHand.transform.position.x - transform.position.x, 2)
-                     + Mathf.Pow(rHand.transform.position.z - transform.position.z, 2) <= Mathf.Pow(_detectRadius, 2)
-                   && rHand.transform.position.y > transform.position.y;
+                   && Mathf.Pow(rHand.transform.parent.position.x - transform.position.x, 2)
+                     + Mathf.Pow(rHand.transform.parent.position.z - transform.position.z, 2) <= Mathf.Pow(_detectRadius, 2)
+                   && rHand.transform.parent.position.y > transform.position.y;
         switch (state) {
             case State.CalibHeight:
                 if (_activeHand.IsTracked)
@@ -115,6 +116,10 @@ public class Table : MonoBehaviour {
 
             if (bugs.Count == 0) {
                 state = State.Redirect;
+                lButton.transform.position = transform.TransformPoint(_maxX - lButton.transform.localScale.x, 0, _minZ + lButton.transform.localScale.z);
+                rButton.transform.position = transform.TransformPoint(_maxX - rButton.transform.localScale.x, 0, _maxZ - rButton.transform.localScale.z);
+                lButton.SetActive(true);
+                rButton.SetActive(true);
                 textMesh.SetText("Pinch to set the size and position of the real object");
             }
         }
@@ -143,21 +148,10 @@ public class Table : MonoBehaviour {
         return false;
     }
 
-    private void RedirectHand(Transform hand, Vector3 center, Vector3 target) {
-        Vector3 toHand = hand.parent.position - center;
-        if (toHand.magnitude >= _detectRadius) {
-            hand.position = hand.parent.position;
-            return;
-        } else if (toHand.magnitude == 0) {
-            hand.position = target;
-            return;
-        }
-
-        Vector3 entryPoint = center + _detectRadius * toHand.normalized;
-        float ratio = toHand.magnitude / _detectRadius;
-        hand.position = ratio * hand.parent.position + (1 - ratio) * target;
-
-        Debug.Log("center:" + center + ", target:" + target + ", ratio:" + ratio + ", pos:" + hand.position);
+    private void RedirectHand(Transform hand, Vector3 warpStart, Vector3 warpEnd, Vector3 handEnd) {
+        Vector3 warp = warpEnd - warpStart;
+        float a = Mathf.Clamp(Vector3.Dot(warp, hand.parent.transform.position - warpStart) / warp.sqrMagnitude, 0, 1);
+        hand.position = hand.parent.transform.position + a * (handEnd - warpEnd);
     }
 
     private void Redirect() {
@@ -167,22 +161,14 @@ public class Table : MonoBehaviour {
         else if (_leftIn)
             isMoving = SetTouchCubeSize(lHand);
 
-        if (!_rightIn && !_leftIn)
-            _selectedCube = -1;
         if (_selectedCube == -1) {
-            foreach (GameObject cube in _touchCubes)
-                cube.GetComponent<MeshRenderer>().material = deselected;
-            if (!isMoving && (_rightIn || _leftIn)) {
-                _selectedCube = Random.Range(0, 3);
-                _touchCubes[_selectedCube].GetComponent<MeshRenderer>().material = selected;
-            }
             lHand.transform.localPosition = Vector3.zero;
             rHand.transform.localPosition = Vector3.zero;
         } else {
             Vector3 center = _touchCubesParent.transform.TransformPoint(_touchCubes[1].transform.localPosition + Vector3.up);
             Vector3 target = _touchCubesParent.transform.TransformPoint(_touchCubes[_selectedCube].transform.localPosition + Vector3.up);
-            RedirectHand(lHand.transform, center, target);
-            RedirectHand(rHand.transform, center, target);
+            RedirectHand(rHand.transform, _redirectStart, center, target);
+            RedirectHand(lHand.transform, _redirectStart, center, target);
         }
     }
 
@@ -234,7 +220,6 @@ public class Table : MonoBehaviour {
         _detectRadius = Mathf.Min((_maxX - _minX) / 2, (_maxZ - _minZ) / 2);
         transform.Translate((_maxX + _minX) / 2, 0, (_maxZ + _minZ) / 2);
         _tableCube.transform.localScale = new Vector3(_maxX - _minX, thickness, _maxZ - _minZ);
-        _collider.size = new Vector3(_maxX - _minX, 0.5f, _maxZ - _minZ);
         for (int i = 0; i < _anchors.Length; i++) {
             _anchors[i].transform.position = positions[i];
             _anchors[i].transform.localPosition = Vector3.Project(_anchors[i].transform.localPosition, _anchors[i].scaleVec);
@@ -274,7 +259,24 @@ public class Table : MonoBehaviour {
             anchor.enabled = false;
         }
         _button.SetActive(false);
+        lButton.SetActive(false);
+        rButton.SetActive(false);
         textMesh.SetText("To set the virtual table height, place your hand on the real table and pinch your thumb and index finger.");
+    }
+
+    public void StartRedirect(OVRHand hand) {
+        if (state != State.Redirect)
+            return;
+        _redirectStart = hand.transform.parent.position;
+    }
+
+    public void NewRedirectTarget(OVRHand hand) {
+        if (state != State.Redirect)
+            return;
+        foreach (GameObject cube in _touchCubes)
+            cube.GetComponent<MeshRenderer>().material = deselected;
+        _selectedCube = Random.Range(0, 3);
+        _touchCubes[_selectedCube].GetComponent<MeshRenderer>().material = selected;
     }
 
     public void EndCalib(OVRHand hand) {
