@@ -9,6 +9,7 @@ public class VideoControlUI : MonoBehaviour {
 
     public VideoPlayer videoPlayer;
     public VideoClip[] clips;
+    public string[] clipNames;
 
     private bool _inMenu;
     private Text[] _progressTextElems;
@@ -43,23 +44,16 @@ public class VideoControlUI : MonoBehaviour {
         volumeSlider.GetComponentInChildren<Slider>().value = 100.0f;
         VolumeChange(volumeSlider.GetComponentInChildren<Slider>().value);
 
+        DebugUIBuilder.instance.AddDivider();
 
-        // DebugUIBuilder.instance.AddButton("Button Pressed", LogButtonPressed);
-        // DebugUIBuilder.instance.AddLabel("Label");
-        // var sliderPrefab = DebugUIBuilder.instance.AddSlider("Slider", 1.0f, 10.0f, SliderPressed, true);
-        // var textElementsInSlider = sliderPrefab.GetComponentsInChildren<Text>();
-        // Assert.AreEqual(textElementsInSlider.Length, 2, "Slider prefab format requires 2 text components (label + value)");
-        // _sliderText = textElementsInSlider[1];
-        // Assert.IsNotNull(_sliderText, "No text component on slider prefab");
-        // _sliderText.text = sliderPrefab.GetComponentInChildren<Slider>().value.ToString();
-        // DebugUIBuilder.instance.AddDivider();
-        // DebugUIBuilder.instance.AddToggle("Toggle", TogglePressed);
-        // DebugUIBuilder.instance.AddRadio("Radio1", "group", delegate (Toggle t) { RadioPressed("Radio1", "group", t); });
-        // DebugUIBuilder.instance.AddRadio("Radio2", "group", delegate (Toggle t) { RadioPressed("Radio2", "group", t); });
-        // DebugUIBuilder.instance.AddLabel("Secondary Tab", 1);
-        // DebugUIBuilder.instance.AddDivider(1);
-        // DebugUIBuilder.instance.AddRadio("Side Radio 1", "group2", delegate (Toggle t) { RadioPressed("Side Radio 1", "group2", t); }, DebugUIBuilder.DEBUG_PANE_RIGHT);
-        // DebugUIBuilder.instance.AddRadio("Side Radio 2", "group2", delegate (Toggle t) { RadioPressed("Side Radio 2", "group2", t); }, DebugUIBuilder.DEBUG_PANE_RIGHT);
+        for (int i = 0; i < Mathf.Min(clips.Length, clipNames.Length); i++) {
+            VideoClip clip = clips[i];
+            DebugUIBuilder.instance.AddRadio(clipNames[i], "videoSelector", delegate (Toggle t) {
+                if (t.isOn) {
+                    videoPlayer.clip = clip;
+                }
+            });
+        }
 
         DebugUIBuilder.instance.Show();
         _inMenu = true;
@@ -109,5 +103,4 @@ public class VideoControlUI : MonoBehaviour {
             _inMenu = !_inMenu;
         }
     }
-
 }
