@@ -12,19 +12,19 @@ public class VideoControlUI : MonoBehaviour {
     public string[] clipNames;
 
     private bool _inMenu;
+    private Slider _progressSilder;
     private Text[] _progressTextElems;
     private Text _playPauseText;
     private Text _volSliderText;
-    private int _activeClip;
 
     private void Start() {
-        _activeClip = 0;
-        videoPlayer.clip = clips[_activeClip];
+        videoPlayer.clip = clips[0];
         videoPlayer.Play();
         videoPlayer.sendFrameReadyEvents = true;
         videoPlayer.frameReady += UpdateProgress;
 
         var progressSlider = DebugUIBuilder.instance.AddSlider("Progress", 0.0f, 1.0f, Scrub, false);
+        _progressSilder = progressSlider.GetComponentInChildren<Slider>();
         _progressTextElems = progressSlider.GetComponentsInChildren<Text>();
         Assert.AreEqual(_progressTextElems.Length, 2, "Slider prefab format requires 2 text components (label + value)");
         UpdateProgress(videoPlayer, 0);
@@ -76,6 +76,7 @@ public class VideoControlUI : MonoBehaviour {
         int length = (int)source.length;
         _progressTextElems[0].text = SecToString(progress);
         _progressTextElems[1].text = SecToString(length);
+        _progressSilder.SetValueWithoutNotify((float) frameIdx / source.frameCount);
     }
 
     public void PlayPause() {
