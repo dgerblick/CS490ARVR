@@ -4,8 +4,13 @@ using UnityEngine;
 
 public class BoxSpawner : MonoBehaviour {
     public GameObject boxPrefab;
-    [SerializeField]
     public float loadDist = float.PositiveInfinity;
+    public float renderHeight = 1.0f;
+    public bool refresh = false;
+    public Material skybox;
+    public Material background;
+    public int cubemapSize = 1024;
+
     public int numBoxes = 11;
     public float spacing = 1f;
     public float minScale = 0.2f;
@@ -17,6 +22,7 @@ public class BoxSpawner : MonoBehaviour {
     private MeshRenderer[] _boxRenderers;
     private float _loadDist = float.PositiveInfinity;
     private float _loadDistSqr = float.PositiveInfinity;
+    private Cubemap _cubemap;
 
     private void Start() {
         float maxDist = Mathf.Sqrt(2.0f * spacing * spacing * (numBoxes + 0.5f) * (numBoxes + 0.5f));
@@ -40,11 +46,38 @@ public class BoxSpawner : MonoBehaviour {
                 idx++;
             }
         }
+
+        _cubemap = new Cubemap(cubemapSize, TextureFormat.RGBA32, false);
+        RefreshCubemap();
     }
 
     private void Update() {
+        if (refresh) {
+            refresh = false;
+            RefreshCubemap();
+        }
+
         foreach (MeshRenderer boxRenderer in _boxRenderers) {
             boxRenderer.enabled = Vector3.Distance(Camera.main.transform.position, boxRenderer.transform.position) < loadDist;
         }
+    }
+
+    private void RefreshCubemap() {
+        RenderSettings.skybox = background;
+
+        GameObject go = new GameObject("CubemapCamera");
+        Camera camera = go.AddComponent<Camera>();
+
+        foreach (MeshRenderer boxRenderer in _boxRenderers) {
+            boxRenderer.enabled = Vector3.Distance(Camera.main.transform.position, boxRenderer.transform.position) >= loadDist;
+        }
+
+        go.transform.position = Vector3.up * renderHeight;
+        go.transform.rotation = Quaternion.identity;
+        camera.RenderToCubemap(_cubemap);
+
+        skybox.SetTexture("_Tex", _cubemap);
+        RenderSettings.skybox = skybox;
+        DestroyImmediate(go);
     }
 }
