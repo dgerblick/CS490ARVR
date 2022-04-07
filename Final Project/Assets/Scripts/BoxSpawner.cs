@@ -4,11 +4,12 @@ using UnityEngine;
 
 public class BoxSpawner : MonoBehaviour {
     public GameObject boxPrefab;
-    public float loadDist = float.PositiveInfinity;
+    public float loadDist = 100;
     public float renderHeight = 1.0f;
     public bool refresh = false;
     public Material skybox;
     public Material background;
+    public Material cachedMaterial;
     public int cubemapSize = 1024;
 
     public int numBoxes = 11;
@@ -20,8 +21,6 @@ public class BoxSpawner : MonoBehaviour {
     public float maxHeightFar = 2.0f;
 
     private MeshRenderer[] _boxRenderers;
-    private float _loadDist = float.PositiveInfinity;
-    private float _loadDistSqr = float.PositiveInfinity;
     private Cubemap _cubemap;
 
     private void Start() {
@@ -41,7 +40,6 @@ public class BoxSpawner : MonoBehaviour {
                 cube.transform.localScale = new Vector3(scale, height, scale);
                 cube.transform.position = new Vector3(x, 0.0f, z);
 
-                cube.transform.parent = transform;
                 _boxRenderers[idx] = cube.GetComponentInChildren<MeshRenderer>();
                 idx++;
             }
@@ -63,21 +61,30 @@ public class BoxSpawner : MonoBehaviour {
     }
 
     private void RefreshCubemap() {
+        transform.localScale = new Vector3(2 * spacing * numBoxes, transform.localScale.y, 2 * spacing * numBoxes);
+
         RenderSettings.skybox = background;
 
         GameObject go = new GameObject("CubemapCamera");
         Camera camera = go.AddComponent<Camera>();
 
-        foreach (MeshRenderer boxRenderer in _boxRenderers) {
-            boxRenderer.enabled = Vector3.Distance(Camera.main.transform.position, boxRenderer.transform.position) >= loadDist;
+        Material[] mats = new Material[_boxRenderers.Length];
+        for (int i = 0; i < _boxRenderers.Length; i++) {
+            _boxRenderers[i].enabled = Vector3.Distance(Camera.main.transform.position, _boxRenderers[i].transform.position) >= loadDist;
+            mats[i] = _boxRenderers[i].material;
+            _boxRenderers[i].material = cachedMaterial;
         }
 
-        go.transform.position = Vector3.up * renderHeight;
+        go.transform.position = new Vector3(0, renderHeight, 0);
         go.transform.rotation = Quaternion.identity;
         camera.RenderToCubemap(_cubemap);
 
         skybox.SetTexture("_Tex", _cubemap);
         RenderSettings.skybox = skybox;
         DestroyImmediate(go);
+        transform.localScale = new Vector3(2 * loadDist, transform.localScale.y, 2 * loadDist);
+        for (int i = 0; i < _boxRenderers.Length; i++) {
+            _boxRenderers[i].material = mats[i];
+        }
     }
 }

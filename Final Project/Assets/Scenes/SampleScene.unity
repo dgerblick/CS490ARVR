@@ -123,6 +123,23 @@ NavMeshSettings:
     debug:
       m_Flags: 0
   m_NavMeshData: {fileID: 0}
+--- !u!1 &218105309 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 100000, guid: 126d619cf4daa52469682f85c1378b4a, type: 3}
+  m_PrefabInstance: {fileID: 283713246}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &218105312
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 218105309}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: eea70ed2d2271b447b0006620ae20a17, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1001 &283713246
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -180,7 +197,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 126d619cf4daa52469682f85c1378b4a, type: 3}
---- !u!1 &714127534
+--- !u!1 &553259971
 GameObject:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -188,39 +205,51 @@ GameObject:
   m_PrefabAsset: {fileID: 0}
   serializedVersion: 6
   m_Component:
-  - component: {fileID: 714127538}
-  - component: {fileID: 714127537}
-  - component: {fileID: 714127536}
-  - component: {fileID: 714127535}
-  - component: {fileID: 714127539}
+  - component: {fileID: 553259975}
+  - component: {fileID: 553259974}
+  - component: {fileID: 553259973}
+  - component: {fileID: 553259972}
   m_Layer: 0
-  m_Name: Plane
+  m_Name: Cylinder
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!64 &714127535
-MeshCollider:
+--- !u!114 &553259972
+MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 714127534}
-  m_Material: {fileID: 0}
-  m_IsTrigger: 0
+  m_GameObject: {fileID: 553259971}
   m_Enabled: 1
-  serializedVersion: 4
-  m_Convex: 0
-  m_CookingOptions: 30
-  m_Mesh: {fileID: 10209, guid: 0000000000000000e000000000000000, type: 0}
---- !u!23 &714127536
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: afc02377afa6cba43b8d8e11a20e1047, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  boxPrefab: {fileID: 6726307181118607511, guid: 3e220aff28f802d4ca014c33dde5964e, type: 3}
+  loadDist: 100
+  renderHeight: 1
+  refresh: 0
+  skybox: {fileID: 2100000, guid: cfaa5b3f6e7256b449da9c27eac50002, type: 2}
+  background: {fileID: 10304, guid: 0000000000000000f000000000000000, type: 0}
+  cachedMaterial: {fileID: 2100000, guid: 0ac61631628e5b54caa1be9fd95c6458, type: 2}
+  cubemapSize: 1024
+  numBoxes: 100
+  spacing: 2
+  minScale: 0.5
+  maxScale: 1.5
+  minHeight: 0.1
+  maxHeightClose: 0.1
+  maxHeightFar: 100
+--- !u!23 &553259973
 MeshRenderer:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 714127534}
+  m_GameObject: {fileID: 553259971}
   m_Enabled: 1
   m_CastShadows: 1
   m_ReceiveShadows: 1
@@ -255,54 +284,45 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
---- !u!33 &714127537
+--- !u!33 &553259974
 MeshFilter:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 714127534}
-  m_Mesh: {fileID: 10209, guid: 0000000000000000e000000000000000, type: 0}
---- !u!4 &714127538
+  m_GameObject: {fileID: 553259971}
+  m_Mesh: {fileID: 10206, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!4 &553259975
 Transform:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 714127534}
+  m_GameObject: {fileID: 553259971}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 100, y: 100, z: 100}
+  m_LocalPosition: {x: 0, y: -0.01, z: 0}
+  m_LocalScale: {x: 1, y: 0.01, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
-  m_RootOrder: 1
+  m_RootOrder: 2
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &714127539
+--- !u!1 &704858722 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 100002, guid: 126d619cf4daa52469682f85c1378b4a, type: 3}
+  m_PrefabInstance: {fileID: 283713246}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &704858726
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 714127534}
+  m_GameObject: {fileID: 704858722}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: afc02377afa6cba43b8d8e11a20e1047, type: 3}
+  m_Script: {fileID: 11500000, guid: eea70ed2d2271b447b0006620ae20a17, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  boxPrefab: {fileID: 6726307181118607511, guid: 3e220aff28f802d4ca014c33dde5964e, type: 3}
-  loadDist: Infinity
-  renderHeight: 1
-  refresh: 0
-  skybox: {fileID: 2100000, guid: cfaa5b3f6e7256b449da9c27eac50002, type: 2}
-  background: {fileID: 10304, guid: 0000000000000000f000000000000000, type: 0}
-  cubemapSize: 1024
-  numBoxes: 50
-  spacing: 2
-  minScale: 0.5
-  maxScale: 1.5
-  minHeight: 0.1
-  maxHeightClose: 0.1
-  maxHeightFar: 100
 --- !u!1 &1189455069
 GameObject:
   m_ObjectHideFlags: 0
@@ -394,5 +414,22 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
-  m_RootOrder: 2
+  m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 45, y: -30, z: 0}
+--- !u!1 &1566840852 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 100006, guid: 126d619cf4daa52469682f85c1378b4a, type: 3}
+  m_PrefabInstance: {fileID: 283713246}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &1566840855
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1566840852}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: eea70ed2d2271b447b0006620ae20a17, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
