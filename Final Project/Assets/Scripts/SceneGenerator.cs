@@ -1,10 +1,13 @@
 using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
+using System.IO;
+using UnityEditor;
 using UnityEngine;
 
 [ExecuteInEditMode]
+[RequireComponent(typeof(SceneCellManager))]
 public class SceneGenerator : MonoBehaviour {
+
     public int cellsPerEdge;
     public float cellEdgeSize;
     public float roadWidth;
@@ -17,11 +20,23 @@ public class SceneGenerator : MonoBehaviour {
 
     // Re-Generate the scene
     public void Generate() {
+#if UNITY_EDITOR
+        if (EditorApplication.isPlaying)
+            return;
         Order66(transform);
 
-        float numCells = 2 * cellsPerEdge;
+        // See if SceneCells Directory Exists
+        if (Directory.Exists("Assets/Resources/SceneCells"))
+            AssetDatabase.DeleteAsset("Assets/Resources/SceneCells");
+        AssetDatabase.CreateFolder("Assets/Resources", "SceneCells");
+
+        int numCells = 2 * cellsPerEdge;
         float sceneWidth = numCells * cellEdgeSize;
 
+        SceneCellManager scm = GetComponent<SceneCellManager>();
+        scm._idMap = new int[numCells, numCells];
+
+        int id = 0;
         for (int i = 0; i < numCells; i++) {
             float x = sceneWidth * ((i + 0.5f) / numCells - 0.5f);
 
@@ -29,10 +44,16 @@ public class SceneGenerator : MonoBehaviour {
                 float z = sceneWidth * ((j + 0.5f) / numCells - 0.5f);
                 bool isborder = i == 0 || i == numCells - 1 || j == 0 || j == numCells - 1;
 
-                GenerateCell(x, z, isborder);
+                SceneCell sc = GenerateCell(x, z, id, isborder);
+                sc.Save();
+                // GameObject.DestroyImmediate(sc.gameObject);
+                scm._idMap[i, j] = id;
+
+                id++;
             }
         }
-
+        scm.ReloadCells();
+#endif
     }
 
     // RotS 1:23:37
@@ -44,14 +65,16 @@ public class SceneGenerator : MonoBehaviour {
             GameObject.DestroyImmediate(youngling);
     }
 
-    private GameObject GenerateCell(float x, float z, bool border = false) {
-        GameObject cell = new GameObject("Cell");
+    private SceneCell GenerateCell(float x, float z, int id, bool border = false) {
+        GameObject cell = new GameObject("Cell" + id);
         cell.transform.SetParent(transform);
         cell.transform.localPosition = new Vector3(x, 0, z);
         cell.transform.localRotation = Quaternion.identity;
         cell.transform.localScale = Vector3.one;
         MeshFilter meshFilter = cell.AddComponent<MeshFilter>();
         MeshRenderer meshRenderer = cell.AddComponent<MeshRenderer>();
+        SceneCell sceneCell = cell.AddComponent<SceneCell>();
+        sceneCell._id = id;
 
         // Generate Plane
         GameObject plane = GameObject.CreatePrimitive(PrimitiveType.Plane);
@@ -84,7 +107,7 @@ public class SceneGenerator : MonoBehaviour {
         // Remove Geometry
         Order66(cell.transform);
 
-        return cell;
+        return sceneCell;
     }
 
     private float GetBuildingCoord(int i) {
@@ -130,3 +153,18 @@ public class SceneGenerator : MonoBehaviour {
         cube.transform.localScale = new Vector3(buildingWidth, height, buildingWidth);
     }
 }
+
+#if UNITY_EDITOR
+[CustomEditor(typeof(SceneGenerator))]
+public class SceneGeneratorEditor : Editor {
+    public override void OnInspectorGUI() {
+        SceneGenerator myTarget = (SceneGenerator)target;
+
+        if (GUILayout.Button("Re-Generate City")) {
+            myTarget.Generate();
+        }
+
+        base.OnInspectorGUI();
+    }
+}
+#endif
