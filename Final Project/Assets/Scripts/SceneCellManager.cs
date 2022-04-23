@@ -32,7 +32,7 @@ public class SceneCellManager : MonoBehaviour {
     }
 
     // RotS 1:23:37
-    private static void Order66(Transform anakin) {
+    public static void Order66(Transform anakin) {
         GameObject[] younglings = new GameObject[anakin.childCount];
         for (int i = 0; i < younglings.Length; i++)
             younglings[i] = anakin.GetChild(i).gameObject;
@@ -48,7 +48,10 @@ public class SceneCellManagerEditor : Editor {
     public override void OnInspectorGUI() {
         SceneCellManager myTarget = (SceneCellManager)target;
 
-        if (GUILayout.Button("Reload Cells")) {
+        if (GUILayout.Button("Unload Cells")) {
+            SceneCellManager.Order66(myTarget.transform);
+        }
+        if (GUILayout.Button("Load/Reload Cells")) {
             myTarget.ReloadCells();
         }
 

@@ -8,6 +8,7 @@ using UnityEngine.Rendering;
 public class SceneCamera : MonoBehaviour {
 
     public Material _material;
+    public Cubemap _cubemap;
 
     private Camera _camera;
     private CommandBuffer _cb;
@@ -17,6 +18,28 @@ public class SceneCamera : MonoBehaviour {
         _camera = GetComponent<Camera>();
         _cb = new CommandBuffer();
         _material = new Material(_material);
+
+        // Load Cubemap
+        string cubemapDir = "Assets/Resources/SceneCells/Cubemaps";
+        Texture2D[] faceTextures = new Texture2D[6];
+        CubemapFace[] faces = new CubemapFace[] {
+            CubemapFace.PositiveX, CubemapFace.NegativeX,
+            CubemapFace.PositiveY, CubemapFace.NegativeY,
+            CubemapFace.PositiveZ, CubemapFace.NegativeZ
+        };
+        for (int i = 0; i < 6; i++) {
+            string filename = cubemapDir + "/Cubemap0_" + faces[i].ToString() + ".png";
+            faceTextures[i] = AssetDatabase.LoadAssetAtPath(filename, typeof(Texture2D)) as Texture2D;
+        }
+        _cubemap = new Cubemap(faceTextures[0].width, TextureFormat.RGB24, false);
+        for (int i = 0; i < 6; i++) {
+            Color[] colors = faceTextures[i].GetPixels();
+            _cubemap.SetPixels(colors, faces[i]);
+        }
+        _cubemap.Apply();
+
+        // Set Cubemap to shader
+        _material.SetTexture("_Cubemap", _cubemap);
 
         Vector3[] verts = new Vector3[] {
             new Vector3 (-1, -1, -1),

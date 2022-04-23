@@ -9,7 +9,7 @@ Material:
   m_PrefabAsset: {fileID: 0}
   m_Name: Skybox
   m_Shader: {fileID: 4800000, guid: 70a4791be04ea324ca370772700e8d96, type: 3}
-  m_ShaderKeywords: _SHOWWIREFRAME_ON
+  m_ShaderKeywords: 
   m_LightmapFlags: 4
   m_EnableInstancingVariants: 0
   m_DoubleSidedGI: 0
@@ -77,7 +77,7 @@ Material:
     - _OcclusionStrength: 1
     - _Parallax: 0.02
     - _Rotation: 0
-    - _ShowWireframe: 1
+    - _ShowWireframe: 0
     - _SmoothnessTextureChannel: 0
     - _SpecularHighlights: 1
     - _SrcBlend: 1
