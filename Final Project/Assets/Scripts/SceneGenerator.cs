@@ -67,9 +67,10 @@ public class SceneGenerator : MonoBehaviour {
         if (Directory.Exists(CUBEMAP_DIR))
             AssetDatabase.DeleteAsset(CUBEMAP_DIR);
         AssetDatabase.CreateFolder(CELL_DIR, CUBEMAP_DIR_NAME);
+        SceneCellManager scm = GetComponent<SceneCellManager>();
 
         // Create Camera and Cubemap objects
-        _cubemapBuffer = new Cubemap(GetComponent<SceneCellManager>()._cubemapSize, TextureFormat.RGBA32, false);
+        _cubemapBuffer = new Cubemap(scm._cubemapSize, TextureFormat.RGBA32, false);
         Camera camera = new GameObject().AddComponent<Camera>();
         camera.transform.parent = transform;
         camera.transform.localPosition = new Vector3(0, _renderHeight, 0);
@@ -77,6 +78,7 @@ public class SceneGenerator : MonoBehaviour {
         _cubemapFaceTex = new Texture2D(_cubemapBuffer.width, _cubemapBuffer.height, TextureFormat.RGB24, false);
 
         // Render Shared (top/bottom) faces
+        scm.HideForCubemapRender(scm.GetCubemapIdx(Vector3.zero));
         camera.RenderToCubemap(_cubemapBuffer);
         SaveFace(CubemapFace.PositiveY, CubemapFace.PositiveY.ToString());
         SaveFace(CubemapFace.NegativeY, CubemapFace.NegativeY.ToString());
@@ -87,17 +89,19 @@ public class SceneGenerator : MonoBehaviour {
             CubemapFace.PositiveZ, CubemapFace.NegativeZ
         };
 
-        int numMaps = 2 * _cellsPerEdge - 1;
+        int numMaps = 2 * _cellsPerEdge + 1;
         for (int i = 0; i < numMaps; i++) {
-            float x = (i - _cellsPerEdge + 1) * _cellEdgeSize;
+            float x = (i - _cellsPerEdge) * _cellEdgeSize;
             for (int j = 0; j < numMaps; j++) {
-                float z = (j - _cellsPerEdge + 1) * _cellEdgeSize;
+                float z = (j - _cellsPerEdge) * _cellEdgeSize;
+                scm.HideForCubemapRender(new Vector2Int(i, j));
                 camera.transform.position = new Vector3(x, _renderHeight, z);
                 camera.RenderToCubemap(_cubemapBuffer);
                 foreach (CubemapFace face in faces)
                     SaveFace(face, string.Format("{0}x{1}_{2}", i, j, face.ToString()));
             }
         }
+        scm.HideForCubemapRender(-Vector2Int.one);
 
         DestroyImmediate(_cubemapFaceTex);
         DestroyImmediate(camera.gameObject);

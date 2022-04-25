@@ -89,9 +89,10 @@ public class SceneCamera : MonoBehaviour {
     private void Update() {
         Vector2Int cubemapPos = _manager.GetCubemapIdx(transform.position);
         if (cubemapPos != _cubemapPos) {
+            _manager.ChangeCubemap(_cubemapPos, cubemapPos);
+            LoadCubemap(cubemapPos.x, cubemapPos.y);
+            Debug.LogFormat("At Cubemap Position: {0}x{1}", cubemapPos.x, cubemapPos.y);
             _cubemapPos = cubemapPos;
-            LoadCubemap(_cubemapPos.x, _cubemapPos.y);
-            Debug.LogFormat("At Cubemap Position: {0}x{1}", _cubemapPos.x, _cubemapPos.y);
         }
     }
 }
