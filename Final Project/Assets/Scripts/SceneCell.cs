@@ -6,11 +6,14 @@ using UnityEngine;
 [RequireComponent(typeof(MeshFilter))]
 public class SceneCell : MonoBehaviour {
 
-    public int _id;
+    public int _i;
+    public int _j;
     public Vector3[] _verticies;
     public Vector2[] _uv;
     public int[] _triangles;
     public bool _serialized = false;
+
+    private const string CELL_PATH = "Assets/Resources/SceneCells";
 
     private void Awake() {
         if (_serialized)
@@ -41,11 +44,11 @@ public class SceneCell : MonoBehaviour {
         }
 
         // Write to File
-        string path = "Assets/Resources/SceneCells/Cell" + _id + ".prefab";
+        string path = string.Format("{0}/{1}_{2}.prefab", CELL_PATH, _i, _j);
         bool status;
         PrefabUtility.SaveAsPrefabAssetAndConnect(gameObject, path, InteractionMode.AutomatedAction, out status);
         if (!status) {
-            Debug.Log("Could not save Cell " + _id);
+            Debug.LogFormat("Could not save Cell {0}_{1}", _i, _j);
         }
 #endif
     }

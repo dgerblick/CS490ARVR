@@ -17,8 +17,17 @@ public class SceneGenerator : MonoBehaviour {
     public float _heightVariation = 10.0f;
     public float _parkChance = 0.2f;
     public Material _material;
-    public int _cubemapSize = 1024;
     public float _renderHeight = 1.0f;
+
+    private Cubemap _cubemapBuffer;
+    private Texture2D _cubemapFaceTex;
+
+    private const string RESOURCES_DIR = "Assets/Resources";
+    private const string CELL_DIR_NAME = "SceneCells";
+    private const string CUBEMAP_DIR_NAME = "Cubemaps";
+    private const string CELL_DIR = RESOURCES_DIR + "/" + CELL_DIR_NAME;
+    private const string CUBEMAP_DIR = CELL_DIR + "/" + CUBEMAP_DIR_NAME;
+
 
 #if UNITY_EDITOR
     // Re-Generate the scene
@@ -28,18 +37,16 @@ public class SceneGenerator : MonoBehaviour {
         Order66(transform);
 
         // See if SceneCells Directory Exists
-        if (Directory.Exists("Assets/Resources/SceneCells"))
-            AssetDatabase.DeleteAsset("Assets/Resources/SceneCells");
-        AssetDatabase.CreateFolder("Assets/Resources", "SceneCells");
+        if (Directory.Exists(CELL_DIR))
+            AssetDatabase.DeleteAsset(CELL_DIR);
+        AssetDatabase.CreateFolder(RESOURCES_DIR, CELL_DIR_NAME);
 
         int numCells = 2 * _cellsPerEdge;
         float sceneWidth = numCells * _cellEdgeSize;
 
         SceneCellManager scm = GetComponent<SceneCellManager>();
-        scm._idMap = new int[numCells, numCells];
 
         // Create Cells
-        int id = 0;
         for (int i = 0; i < numCells; i++) {
             float x = sceneWidth * ((i + 0.5f) / numCells - 0.5f);
 
@@ -47,11 +54,8 @@ public class SceneGenerator : MonoBehaviour {
                 float z = sceneWidth * ((j + 0.5f) / numCells - 0.5f);
                 bool isborder = i == 0 || i == numCells - 1 || j == 0 || j == numCells - 1;
 
-                SceneCell sc = GenerateCell(x, z, id, isborder);
+                SceneCell sc = GenerateCell(x, z, i, j, isborder);
                 sc.Save();
-                scm._idMap[i, j] = id;
-
-                id++;
             }
         }
         scm.ReloadCells();
@@ -59,45 +63,59 @@ public class SceneGenerator : MonoBehaviour {
     }
 
     public void GenerateCubemaps() {
-        string cubemapDir = "Assets/Resources/SceneCells/Cubemaps";
         // See if SceneCells/Cubemaps Directory Exists
-        if (Directory.Exists(cubemapDir))
-            AssetDatabase.DeleteAsset(cubemapDir);
-        AssetDatabase.CreateFolder("Assets/Resources/SceneCells", "Cubemaps");
+        if (Directory.Exists(CUBEMAP_DIR))
+            AssetDatabase.DeleteAsset(CUBEMAP_DIR);
+        AssetDatabase.CreateFolder(CELL_DIR, CUBEMAP_DIR_NAME);
 
-        // Render into Cubemap
+        // Create Camera and Cubemap objects
+        _cubemapBuffer = new Cubemap(GetComponent<SceneCellManager>()._cubemapSize, TextureFormat.RGBA32, false);
         Camera camera = new GameObject().AddComponent<Camera>();
-        Cubemap cubemap = new Cubemap(_cubemapSize, TextureFormat.RGBA32, false);
-        camera.transform.position = new Vector3(0, _renderHeight, 0);
-        camera.transform.rotation = Quaternion.identity;
-        camera.RenderToCubemap(cubemap);
-        AssetDatabase.SaveAssets();
-        AssetDatabase.Refresh();
+        camera.transform.parent = transform;
+        camera.transform.localPosition = new Vector3(0, _renderHeight, 0);
+        camera.transform.localRotation = Quaternion.identity;
+        _cubemapFaceTex = new Texture2D(_cubemapBuffer.width, _cubemapBuffer.height, TextureFormat.RGB24, false);
+
+        // Render Shared (top/bottom) faces
+        camera.RenderToCubemap(_cubemapBuffer);
+        SaveFace(CubemapFace.PositiveY, CubemapFace.PositiveY.ToString());
+        SaveFace(CubemapFace.NegativeY, CubemapFace.NegativeY.ToString());
 
         // Write to Files
-        Texture2D tex = new Texture2D(cubemap.width, cubemap.height, TextureFormat.RGB24, false);
         CubemapFace[] faces = new CubemapFace[] {
             CubemapFace.PositiveX, CubemapFace.NegativeX,
-            CubemapFace.PositiveY, CubemapFace.NegativeY,
             CubemapFace.PositiveZ, CubemapFace.NegativeZ
         };
-        foreach (CubemapFace face in faces) {
-            // Write Face
-            tex.SetPixels(cubemap.GetPixels(face));
-            byte[] data = tex.EncodeToPNG();
-            string filename = cubemapDir + "/Cubemap0_" + face.ToString() + ".png";
-            File.WriteAllBytes(filename, data);
 
-            // Set proper settings
-            AssetDatabase.ImportAsset(filename);
-            TextureImporter importer = AssetImporter.GetAtPath(filename) as TextureImporter;
-            importer.isReadable = true;
-            importer.mipmapEnabled = false;
-            importer.SaveAndReimport();
+        int numMaps = 2 * _cellsPerEdge - 1;
+        for (int i = 0; i < numMaps; i++) {
+            float x = (i - _cellsPerEdge + 1) * _cellEdgeSize;
+            for (int j = 0; j < numMaps; j++) {
+                float z = (j - _cellsPerEdge + 1) * _cellEdgeSize;
+                camera.transform.position = new Vector3(x, _renderHeight, z);
+                camera.RenderToCubemap(_cubemapBuffer);
+                foreach (CubemapFace face in faces)
+                    SaveFace(face, string.Format("{0}x{1}_{2}", i, j, face.ToString()));
+            }
         }
 
-        DestroyImmediate(tex);
+        DestroyImmediate(_cubemapFaceTex);
         DestroyImmediate(camera.gameObject);
+    }
+
+    private void SaveFace(CubemapFace face, string filename) {
+        // Save to file
+        _cubemapFaceTex.SetPixels(_cubemapBuffer.GetPixels(face));
+        byte[] data = _cubemapFaceTex.EncodeToPNG();
+        string path = string.Format("{0}/{1}.png", CUBEMAP_DIR, filename);
+        File.WriteAllBytes(path, data);
+
+        // Set proper settings
+        AssetDatabase.ImportAsset(path);
+        TextureImporter importer = AssetImporter.GetAtPath(path) as TextureImporter;
+        importer.isReadable = true;
+        importer.mipmapEnabled = false;
+        importer.SaveAndReimport();
     }
 #endif
 
@@ -110,8 +128,8 @@ public class SceneGenerator : MonoBehaviour {
             DestroyImmediate(youngling);
     }
 
-    private SceneCell GenerateCell(float x, float z, int id, bool border = false) {
-        GameObject cell = new GameObject("Cell" + id);
+    private SceneCell GenerateCell(float x, float z, int i, int j, bool border = false) {
+        GameObject cell = new GameObject(string.Format("{0}_{1}", i, j));
         cell.transform.SetParent(transform);
         cell.transform.localPosition = new Vector3(x, 0, z);
         cell.transform.localRotation = Quaternion.identity;
@@ -119,7 +137,8 @@ public class SceneGenerator : MonoBehaviour {
         MeshFilter meshFilter = cell.AddComponent<MeshFilter>();
         MeshRenderer meshRenderer = cell.AddComponent<MeshRenderer>();
         SceneCell sceneCell = cell.AddComponent<SceneCell>();
-        sceneCell._id = id;
+        sceneCell._i = i;
+        sceneCell._j = j;
 
         // Generate Plane
         GameObject plane = GameObject.CreatePrimitive(PrimitiveType.Plane);
@@ -141,9 +160,9 @@ public class SceneGenerator : MonoBehaviour {
         // Combine Meshes
         MeshFilter[] meshFilters = cell.GetComponentsInChildren<MeshFilter>();
         CombineInstance[] combine = new CombineInstance[meshFilters.Length];
-        for (int i = 0; i < meshFilters.Length; i++) {
-            combine[i].mesh = meshFilters[i].sharedMesh;
-            combine[i].transform = cell.transform.worldToLocalMatrix * meshFilters[i].transform.localToWorldMatrix;
+        for (int k = 0; k < meshFilters.Length; k++) {
+            combine[k].mesh = meshFilters[k].sharedMesh;
+            combine[k].transform = cell.transform.worldToLocalMatrix * meshFilters[k].transform.localToWorldMatrix;
         }
         meshFilter.sharedMesh = new Mesh();
         meshFilter.sharedMesh.CombineMeshes(combine);
