@@ -2,14 +2,24 @@
 
 Shader "Custom/MyCubeMap" {
     Properties {
-        _Cubemap ("Fallback Cubemap", CUBE) = "grey" { }
+        _CubemapSW ("Southwest Cubemap", CUBE) = "grey" { }
+        _CubemapNW ("Northwest Cubemap", CUBE) = "grey" { }
+        _CubemapSE ("Southeast Cubemap", CUBE) = "grey" { }
+        _CubemapNE ("Northeast Cubemap", CUBE) = "grey" { }
+        _PosX ("X Position", Range(0.0, 1.0)) = 0.0
+        _PosY ("Y Position", Range(0.0, 1.0)) = 0.0
         [Toggle] _ShowWireframe ("Show Wireframe", Int) = 0
     }
     CGINCLUDE
 
     #include "UnityCG.cginc"
 
-    samplerCUBE _Cubemap;
+    samplerCUBE _CubemapSW;
+    samplerCUBE _CubemapNW;
+    samplerCUBE _CubemapSE;
+    samplerCUBE _CubemapNE;
+    float _PosX;
+    float _PosY;
     int _ShowWireframe;
 
     struct v2f {
@@ -59,7 +69,12 @@ Shader "Custom/MyCubeMap" {
     }
 
     half4 frag(g2f i) : COLOR {
-        float4 c = texCUBE(_Cubemap, i.texcoord);
+        float4 nw = texCUBE(_CubemapNW, i.texcoord);
+        float4 sw = texCUBE(_CubemapSW, i.texcoord);
+        float4 ne = texCUBE(_CubemapNE, i.texcoord);
+        float4 se = texCUBE(_CubemapSE, i.texcoord);
+
+        float4 c = lerp(lerp(nw, sw, _PosY), lerp(ne, se, _PosY), _PosX);
 
         // Show wireframe
         float wireThickness = 0.005;

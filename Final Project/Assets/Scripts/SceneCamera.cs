@@ -1,6 +1,4 @@
-using System.Collections;
-using System.Collections.Generic;
-using UnityEditor;
+using System;
 using UnityEngine;
 using UnityEngine.Rendering;
 
@@ -9,20 +7,20 @@ public class SceneCamera : MonoBehaviour {
 
     public SceneCellManager _manager;
     public Material _material;
-    public Cubemap _cubemap;
 
     private Camera _camera;
     private CommandBuffer _cb;
     private Mesh _skyMesh;
     private Vector2Int _cubemapPos;
-
-    private const string CUBEMAP_DIR = "Assets/Resources/SceneCells/Cubemaps";
+    private Vector2Int _cellPos;
+    private Cubemap[] _cubemaps;
 
     private void Awake() {
         _camera = GetComponent<Camera>();
         _cb = new CommandBuffer();
         _material = new Material(_material);
         _cubemapPos = new Vector2Int(-1, -1);
+        _cellPos = new Vector2Int(-1, -1);
 
         Vector3[] verts = new Vector3[] {
             new Vector3 (-1, -1, -1),
@@ -61,38 +59,32 @@ public class SceneCamera : MonoBehaviour {
         _cb.DrawMesh(_skyMesh, Matrix4x4.identity, _material);
         _camera.AddCommandBuffer(CameraEvent.AfterImageEffectsOpaque, _cb);
 
-        _cubemap = new Cubemap(_manager._cubemapSize, TextureFormat.RGB24, 0);
-        LoadCubemapFace(CubemapFace.PositiveY, string.Format("{0}/{1}.png", CUBEMAP_DIR, CubemapFace.PositiveY.ToString()));
-        LoadCubemapFace(CubemapFace.NegativeY, string.Format("{0}/{1}.png", CUBEMAP_DIR, CubemapFace.NegativeY.ToString()));
-        _cubemap.Apply();
-        _material.SetTexture("_Cubemap", _cubemap);
-    }
-
-    private void LoadCubemap(int i, int j) {
-        // Load Cubemap Faces
-        CubemapFace[] faces = new CubemapFace[] { CubemapFace.PositiveX, CubemapFace.NegativeX, CubemapFace.PositiveZ, CubemapFace.NegativeZ };
-        foreach (CubemapFace face in faces)
-            LoadCubemapFace(face, string.Format("{0}/{1}x{2}_{3}.png", CUBEMAP_DIR, i, j, face));
-        _cubemap.Apply();
-
-        // Set Cubemap to shader
-        // _material.SetTexture("_Cubemap", _cubemap);
-    }
-
-    private void LoadCubemapFace(CubemapFace face, string filename) {
-        Texture2D tex = AssetDatabase.LoadAssetAtPath(filename, typeof(Texture2D)) as Texture2D;
-        Color[] colors = tex.GetPixels();
-        Resources.UnloadAsset(tex);
-        _cubemap.SetPixels(colors, face);
+        _cubemaps = new Cubemap[4];
+        for (int i = 0; i < 4; i++) {
+            _cubemaps[i] = new Cubemap(_manager._cubemapSize, TextureFormat.RGB24, 0);
+            _manager.LoadCubemapTopBottom(_cubemaps[i]);
+        }
+        _material.SetTexture("_CubemapSW", _cubemaps[0]);
+        _material.SetTexture("_CubemapNW", _cubemaps[1]);
+        _material.SetTexture("_CubemapSE", _cubemaps[2]);
+        _material.SetTexture("_CubemapNE", _cubemaps[3]);
     }
 
     private void Update() {
-        Vector2Int cubemapPos = _manager.GetCubemapIdx(transform.position);
+        Vector2Int cubemapPos = _manager.GetNearestCubemap(transform.position);
         if (cubemapPos != _cubemapPos) {
             _manager.ChangeCubemap(_cubemapPos, cubemapPos);
-            LoadCubemap(cubemapPos.x, cubemapPos.y);
             Debug.LogFormat("At Cubemap Position: {0}x{1}", cubemapPos.x, cubemapPos.y);
             _cubemapPos = cubemapPos;
         }
+
+        Tuple<Vector2Int, Vector2> cellPos = _manager.GetCellPos(transform.position);
+        if (cellPos.Item1 != _cellPos) {
+            _manager.ChangeCell(cellPos.Item1, _cubemaps);
+            Debug.LogFormat("At Cell Position: {0}x{1}", cellPos.Item1.x, cellPos.Item1.y);
+            _cellPos = cellPos.Item1;
+        }
+        _material.SetFloat("_PosX", cellPos.Item2.x);
+        _material.SetFloat("_PosY", cellPos.Item2.y);
     }
 }

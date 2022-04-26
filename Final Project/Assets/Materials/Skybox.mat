@@ -27,6 +27,22 @@ Material:
         m_Texture: {fileID: 8900000, guid: 688075b2003a4474b8a0ea4e06e06b3e, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: -8.8, y: 0}
+    - _CubemapNE:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _CubemapNW:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _CubemapSE:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _CubemapSW:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
     - _DetailAlbedoMap:
         m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
@@ -76,6 +92,8 @@ Material:
     - _Mode: 0
     - _OcclusionStrength: 1
     - _Parallax: 0.02
+    - _PosX: 0
+    - _PosY: 0
     - _Rotation: 0
     - _ShowWireframe: 0
     - _SmoothnessTextureChannel: 0

@@ -78,7 +78,7 @@ public class SceneGenerator : MonoBehaviour {
         _cubemapFaceTex = new Texture2D(_cubemapBuffer.width, _cubemapBuffer.height, TextureFormat.RGB24, false);
 
         // Render Shared (top/bottom) faces
-        scm.HideForCubemapRender(scm.GetCubemapIdx(Vector3.zero));
+        scm.HideForCubemapRender(scm.GetNearestCubemap(Vector3.zero));
         camera.RenderToCubemap(_cubemapBuffer);
         SaveFace(CubemapFace.PositiveY, CubemapFace.PositiveY.ToString());
         SaveFace(CubemapFace.NegativeY, CubemapFace.NegativeY.ToString());
