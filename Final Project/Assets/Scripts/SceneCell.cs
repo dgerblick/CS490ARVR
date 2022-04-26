@@ -32,16 +32,19 @@ public class SceneCell : MonoBehaviour {
         mf.sharedMesh.RecalculateBounds();
     }
 
-    public void Save() {
 #if UNITY_EDITOR
+    public void Save() {
         // Serialize Mesh
+        Mesh mesh = GetComponent<MeshFilter>().sharedMesh;
         if (!_serialized) {
-            Mesh mesh = GetComponent<MeshFilter>().sharedMesh;
             _verticies = mesh.vertices;
             _uv = mesh.uv;
             _triangles = mesh.triangles;
             _serialized = true;
         }
+
+        // Clear Mesh
+        mesh.Clear();
 
         // Write to File
         string path = string.Format("{0}/{1}_{2}.prefab", CELL_PATH, _i, _j);
@@ -50,8 +53,8 @@ public class SceneCell : MonoBehaviour {
         if (!status) {
             Debug.LogFormat("Could not save Cell {0}_{1}", _i, _j);
         }
-#endif
     }
+#endif
 }
 
 #if UNITY_EDITOR

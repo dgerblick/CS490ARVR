@@ -55,7 +55,6 @@ public class SceneGenerator : MonoBehaviour {
                 bool isborder = i == 0 || i == numCells - 1 || j == 0 || j == numCells - 1;
 
                 SceneCell sc = GenerateCell(x, z, i, j, isborder);
-                sc.Save();
             }
         }
         scm.ReloadCells();
@@ -105,6 +104,13 @@ public class SceneGenerator : MonoBehaviour {
 
         DestroyImmediate(_cubemapFaceTex);
         DestroyImmediate(camera.gameObject);
+    }
+
+    public void SaveCells() {
+        var sceneCells = GetComponentsInChildren<SceneCell>();
+        foreach (SceneCell sc in sceneCells) {
+            sc.Save();
+        }
     }
 
     private void SaveFace(CubemapFace face, string filename) {
@@ -228,12 +234,12 @@ public class SceneGeneratorEditor : Editor {
     public override void OnInspectorGUI() {
         SceneGenerator myTarget = (SceneGenerator)target;
 
-        if (GUILayout.Button("Generate City")) {
+        if (GUILayout.Button("Generate City"))
             myTarget.Generate();
-        }
-        if (GUILayout.Button("Generate Cubemaps")) {
+        if (GUILayout.Button("Generate Cubemaps"))
             myTarget.GenerateCubemaps();
-        }
+        if (GUILayout.Button("Save Cells"))
+            myTarget.SaveCells();
 
         base.OnInspectorGUI();
     }
