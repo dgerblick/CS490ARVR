@@ -40,6 +40,7 @@ Shader "Custom/MyCubeMap" {
         float3 posNW : TEXCOORD1;
         float3 posSE : TEXCOORD2;
         float3 posNE : TEXCOORD3;
+        float3 texcoord : TEXCOORD4;
     };
 
     struct g2f {
@@ -49,6 +50,7 @@ Shader "Custom/MyCubeMap" {
         float3 posSE : TEXCOORD2;
         float3 posNE : TEXCOORD3;
         float3 barycentric : TEXCOORD4;
+        float3 texcoord : TEXCOORD5;
     };
 
 
@@ -59,11 +61,13 @@ Shader "Custom/MyCubeMap" {
             pos = lerp(lerp(v.posNW, v.posSW, _PosY), lerp(v.posNE, v.posNE, _PosY), _PosX);
         }
         o.position = mul(UNITY_MATRIX_MVP, float4(pos, 0.0));
+        o.position.z = mul(UNITY_MATRIX_MVP, float4(pos, 1.0)).z;
         o.position.z = 0.0;
         o.posSW = v.posSW;
         o.posNW = v.posNW;
         o.posSE = v.posSE;
         o.posNE = v.posNE;
+        o.texcoord = v.position.xyz;
         return o;
     }
 
@@ -75,6 +79,7 @@ Shader "Custom/MyCubeMap" {
         o0.posNW = i[0].posNW;
         o0.posSE = i[0].posSE;
         o0.posNE = i[0].posNE;
+        o0.texcoord = i[0].texcoord;
         o0.barycentric = float3(1, 0, 0);
         // o0.t0 = i[0].position;
         // o0.t1 = i[1].position;
@@ -87,6 +92,7 @@ Shader "Custom/MyCubeMap" {
         o1.posNW = i[1].posNW;
         o1.posSE = i[1].posSE;
         o1.posNE = i[1].posNE;
+        o1.texcoord = i[1].texcoord;
         o1.barycentric = float3(0, 1, 0);
         // o1.t0 = i[0].position;
         // o1.t1 = i[1].position;
@@ -99,6 +105,7 @@ Shader "Custom/MyCubeMap" {
         o2.posNW = i[2].posNW;
         o2.posSE = i[2].posSE;
         o2.posNE = i[2].posNE;
+        o2.texcoord = i[2].texcoord;
         o2.barycentric = float3(0, 0, 1);
         // o2.t0 = i[0].position;
         // o2.t1 = i[1].position;
@@ -107,10 +114,10 @@ Shader "Custom/MyCubeMap" {
     }
 
     half4 frag(g2f i) : COLOR {
-        float4 sw = texCUBE(_CubemapSW, i.posSW);
-        float4 nw = texCUBE(_CubemapNW, i.posNW);
-        float4 se = texCUBE(_CubemapSE, i.posSE);
-        float4 ne = texCUBE(_CubemapNE, i.posNE);
+        float4 sw = texCUBE(_CubemapSW, i.texcoord);
+        float4 nw = texCUBE(_CubemapNW, i.texcoord);
+        float4 se = texCUBE(_CubemapSE, i.texcoord);
+        float4 ne = texCUBE(_CubemapNE, i.texcoord);
 
         // Add Texture
         float4 c = float4(1.0, 1.0, 1.0, 1.0);
@@ -135,7 +142,7 @@ Shader "Custom/MyCubeMap" {
     SubShader { 
         Tags { "Queue"="Background" "RenderType"="Background" "PreviewType"="Skybox" }
         Pass {
-            ZWrite Off
+            // ZWrite Off
             Cull Off
             Fog { Mode Off }
             

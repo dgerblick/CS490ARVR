@@ -129,18 +129,18 @@ public class SceneCell : MonoBehaviour {
 
         // Calculate offset
         Vector3[] corners = new Vector3[4] {
-            transform.TransformPoint(edgeSize * new Vector3(-1, 0, -1)),
-            transform.TransformPoint(edgeSize * new Vector3(-1, 0,  1)),
-            transform.TransformPoint(edgeSize * new Vector3( 1, 0, -1)),
-            transform.TransformPoint(edgeSize * new Vector3( 1, 0,  1)),
+            0.1f * edgeSize * new Vector3(-1, 0, -1),
+            0.1f * edgeSize * new Vector3(-1, 0,  1),
+            0.1f * edgeSize * new Vector3( 1, 0, -1),
+            0.1f * edgeSize * new Vector3( 1, 0,  1),
         };
         foreach (Vector3 dir in _morphVerts) {
             RaycastHit hit;
             if (Physics.Raycast(transform.position, dir, out hit, Mathf.Infinity)) {
-                _morphSW.Add(Vector3.Normalize(hit.point - corners[0]));
-                _morphNW.Add(Vector3.Normalize(hit.point - corners[1]));
-                _morphSE.Add(Vector3.Normalize(hit.point - corners[2]));
-                _morphNE.Add(Vector3.Normalize(hit.point - corners[3]));
+                _morphSW.Add(Vector3.Normalize(transform.InverseTransformPoint(hit.point) - corners[0]));
+                _morphNW.Add(Vector3.Normalize(transform.InverseTransformPoint(hit.point) - corners[1]));
+                _morphSE.Add(Vector3.Normalize(transform.InverseTransformPoint(hit.point) - corners[2]));
+                _morphNE.Add(Vector3.Normalize(transform.InverseTransformPoint(hit.point) - corners[3]));
             } else {
                 _morphSW.Add(dir);
                 _morphNW.Add(dir);
