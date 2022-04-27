@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using UnityEditor;
 using UnityEngine;
 
@@ -57,8 +58,11 @@ public class SceneGenerator : MonoBehaviour {
                 SceneCell sc = GenerateCell(x, z, i, j, isborder);
             }
         }
+        scm.UpdateCellCount();
+        GenerateMorphMesh();
+        SaveCells();
         scm.ReloadCells();
-        GenerateCubemaps();
+        // GenerateCubemaps();
     }
 
     public void GenerateCubemaps() {
@@ -104,6 +108,16 @@ public class SceneGenerator : MonoBehaviour {
 
         DestroyImmediate(_cubemapFaceTex);
         DestroyImmediate(camera.gameObject);
+    }
+
+    public void GenerateMorphMesh() {
+        SceneCellManager scm = GetComponent<SceneCellManager>();
+        int numCells = 2 * _cellsPerEdge;
+        for (int i = 0; i < numCells; i++) {
+            for (int j = 0; j < numCells; j++) {
+                scm.GenerateMorph(new Vector2Int(i, j), 1024);
+            }
+        }
     }
 
     public void SaveCells() {
@@ -178,6 +192,8 @@ public class SceneGenerator : MonoBehaviour {
         meshFilter.sharedMesh.CombineMeshes(combine);
         meshRenderer.material = _material;
 
+        cell.AddComponent<MeshCollider>().sharedMesh = meshFilter.sharedMesh;
+
         // Remove Geometry
         Order66(cell.transform);
 
@@ -238,6 +254,8 @@ public class SceneGeneratorEditor : Editor {
             myTarget.Generate();
         if (GUILayout.Button("Generate Cubemaps"))
             myTarget.GenerateCubemaps();
+        if (GUILayout.Button("Generate Morph Mesh"))
+            myTarget.GenerateMorphMesh();
         if (GUILayout.Button("Save Cells"))
             myTarget.SaveCells();
 
