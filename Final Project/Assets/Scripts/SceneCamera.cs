@@ -7,10 +7,10 @@ public class SceneCamera : MonoBehaviour {
 
     public SceneCellManager _manager;
     public Material _material;
+    public Mesh _skyMesh;
 
     private Camera _camera;
     private CommandBuffer _cb;
-    private Mesh _skyMesh;
     private Vector2Int _cubemapPos;
     private Vector2Int _cellPos;
     private Cubemap[] _cubemaps;
@@ -51,6 +51,9 @@ public class SceneCamera : MonoBehaviour {
         _skyMesh = new Mesh();
         _skyMesh.SetVertices(verts);
         _skyMesh.SetUVs(0, verts);
+        _skyMesh.SetUVs(1, verts);
+        _skyMesh.SetUVs(2, verts);
+        _skyMesh.SetUVs(3, verts);
         _skyMesh.SetTriangles(tris, 0);
         _skyMesh.RecalculateNormals();
         _skyMesh.RecalculateBounds();
@@ -80,7 +83,11 @@ public class SceneCamera : MonoBehaviour {
 
         Tuple<Vector2Int, Vector2> cellPos = _manager.GetCellPos(transform.position);
         if (cellPos.Item1 != _cellPos) {
-            _manager.ChangeCell(cellPos.Item1, _cubemaps);
+            _manager.ChangeCell(cellPos.Item1, _cubemaps, _skyMesh);
+            _skyMesh.RecalculateNormals();
+            _skyMesh.RecalculateBounds();
+            // _camera.RemoveCommandBuffer(CameraEvent.AfterImageEffectsOpaque, _cb);
+            // _camera.AddCommandBuffer(CameraEvent.AfterImageEffectsOpaque, _cb);
             Debug.LogFormat("At Cell Position: {0}x{1}", cellPos.Item1.x, cellPos.Item1.y);
             _cellPos = cellPos.Item1;
         }

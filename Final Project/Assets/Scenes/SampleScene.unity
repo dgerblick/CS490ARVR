@@ -142,7 +142,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _manager: {fileID: 1625848699}
   _material: {fileID: 2100000, guid: cfaa5b3f6e7256b449da9c27eac50002, type: 2}
-  _cubemap: {fileID: 0}
+  _skyMesh: {fileID: 0}
 --- !u!1001 &283713246
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -235,7 +235,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _manager: {fileID: 1625848699}
   _material: {fileID: 2100000, guid: cfaa5b3f6e7256b449da9c27eac50002, type: 2}
-  _cubemap: {fileID: 0}
+  _skyMesh: {fileID: 0}
 --- !u!1 &1189455069
 GameObject:
   m_ObjectHideFlags: 0
@@ -348,7 +348,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _manager: {fileID: 1625848699}
   _material: {fileID: 2100000, guid: cfaa5b3f6e7256b449da9c27eac50002, type: 2}
-  _cubemap: {fileID: 0}
+  _skyMesh: {fileID: 0}
 --- !u!1 &1625848696
 GameObject:
   m_ObjectHideFlags: 0
@@ -389,6 +389,7 @@ MonoBehaviour:
   _parkChance: 0.2
   _material: {fileID: 2100000, guid: 7c65ea8737338254793c0a5f625773a7, type: 2}
   _renderHeight: 1
+  _morphSubdivisions: 2
 --- !u!4 &1625848698
 Transform:
   m_ObjectHideFlags: 0

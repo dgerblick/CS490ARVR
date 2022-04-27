@@ -75,7 +75,7 @@ public class SceneCellManager : MonoBehaviour {
         _cellRenderers = new MeshRenderer[maxI, maxJ];
         _cameraCount = new int[maxI, maxJ];
         _cubemapFaces = new Texture2D[maxI + 1, maxJ + 1, 4];
-        
+
         foreach (SceneCell sc in cells) {
             Vector2Int ij = UnparseName(sc.gameObject.name);
             _cells[ij.x, ij.y] = sc;
@@ -139,7 +139,7 @@ public class SceneCellManager : MonoBehaviour {
                 _cellRenderers[i, j].enabled = _cameraCount[i, j] > 0;
     }
 
-    public void ChangeCell(Vector2Int pos, Cubemap[] cubemaps) {
+    public void ChangeCell(Vector2Int pos, Cubemap[] cubemaps, Mesh mesh) {
         CubemapFace[] faces = new CubemapFace[] { CubemapFace.PositiveX, CubemapFace.NegativeX, CubemapFace.PositiveZ, CubemapFace.NegativeZ };
         Vector2Int[] offsets = new Vector2Int[] {
             new Vector2Int(0, 0),
@@ -149,24 +149,29 @@ public class SceneCellManager : MonoBehaviour {
         };
         for (int i = 0; i < 4; i++) {
             Vector2Int target = pos + offsets[i];
-            for (int j = 0; j < faces.Length; j++)
-                cubemaps[i].SetPixels(_cubemapFaces[target.x, target.y, j].GetPixels(), faces[j]);
+            for (int j = 0; j < faces.Length; j++) {
+                if (_cubemapFaces[target.x, target.y, j] != null) {
+                    cubemaps[i].SetPixels(_cubemapFaces[target.x, target.y, j].GetPixels(), faces[j]);
+                }
+            }
             cubemaps[i].Apply();
         }
+        _cells[pos.x, pos.y].ApplyMorphMesh(mesh);
     }
 
     public void LoadCubemapTopBottom(Cubemap cubemap) {
         if (_topFace == null) {
             string topFile = string.Format("{0}/{1}", CUBEMAP_DIR, CubemapFace.PositiveY.ToString());
             _topFace = Resources.Load<Texture2D>(topFile);
-
         }
         if (_bottomFace == null) {
             string bottomFile = string.Format("{0}/{1}", CUBEMAP_DIR, CubemapFace.NegativeY.ToString());
             _bottomFace = Resources.Load<Texture2D>(bottomFile);
         }
-        cubemap.SetPixels(_topFace.GetPixels(), CubemapFace.PositiveY);
-        cubemap.SetPixels(_bottomFace.GetPixels(), CubemapFace.NegativeY);
+        if (_topFace != null)
+            cubemap.SetPixels(_topFace.GetPixels(), CubemapFace.PositiveY);
+        if (_bottomFace != null)
+            cubemap.SetPixels(_bottomFace.GetPixels(), CubemapFace.NegativeY);
         cubemap.Apply();
     }
 
@@ -185,27 +190,10 @@ public class SceneCellManager : MonoBehaviour {
         }
     }
 
-    public void GenerateMorph(Vector2Int pos, int numVerts) {
+    public void GenerateMorph(Vector2Int pos, int numSubdivisions) {
         HideForCubemapRender(pos);
-
-        List<Vector4> verts = new List<Vector4>();
-
-        int hits = 0;
-        for (int i = 0; i < numVerts; i++) {
-            Vector3 dir = UnityEngine.Random.onUnitSphere;
-            RaycastHit hit;
-            if (Physics.Raycast(_cells[pos.x, pos.y].transform.position, dir, out hit)) {
-                hits++;
-                verts.Add(new Vector4(hit.point.x, hit.point.y, hit.point.z, 1));
-            } else {
-                verts.Add(new Vector4(dir.x, dir.y, dir.z, 0));
-            }
-        }
+        _cells[pos.x, pos.y].GenerateMorph(numSubdivisions, _cellEdgeSize);
         HideForCubemapRender(-Vector2Int.one);
-
-        _cells[pos.x, pos.y].GenerateMorph(verts, _cellEdgeSize);
-
-        Debug.LogFormat("{0}x{1}: {2}/{3} hits", pos.x, pos.y, hits, numVerts);
     }
 
     private void Start() {

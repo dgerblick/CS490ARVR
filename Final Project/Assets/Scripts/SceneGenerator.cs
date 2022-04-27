@@ -19,6 +19,7 @@ public class SceneGenerator : MonoBehaviour {
     public float _parkChance = 0.2f;
     public Material _material;
     public float _renderHeight = 1.0f;
+    public int _morphSubdivisions = 0;
 
     private Cubemap _cubemapBuffer;
     private Texture2D _cubemapFaceTex;
@@ -62,7 +63,7 @@ public class SceneGenerator : MonoBehaviour {
         GenerateMorphMesh();
         SaveCells();
         scm.ReloadCells();
-        // GenerateCubemaps();
+        GenerateCubemaps();
     }
 
     public void GenerateCubemaps() {
@@ -115,7 +116,7 @@ public class SceneGenerator : MonoBehaviour {
         int numCells = 2 * _cellsPerEdge;
         for (int i = 0; i < numCells; i++) {
             for (int j = 0; j < numCells; j++) {
-                scm.GenerateMorph(new Vector2Int(i, j), 1024);
+                scm.GenerateMorph(new Vector2Int(i, j), _morphSubdivisions);
             }
         }
     }
